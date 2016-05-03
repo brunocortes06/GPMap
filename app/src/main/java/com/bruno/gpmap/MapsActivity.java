@@ -3,6 +3,7 @@ package com.bruno.gpmap;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -19,6 +20,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_maps);
 
         GPSTracker gps;
@@ -54,6 +56,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng local = new LatLng(latitude,longitude);
         mMap.addMarker(new MarkerOptions().position(local).title("Estou Aqui"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(local));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local,10));
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 }
