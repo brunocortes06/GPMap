@@ -9,9 +9,8 @@
     <string name="prompt_password">Senha</string>
     <string name="pick_date">Data de nascimento</string>
     <string name="gender">Genero</string>
-    <string name="action_sign_in">Entrar ou registrar</string>
-    <string name="action_register">Cadastrar</string>
-    <string name="action_sign_in_short">Entrar</string>
+    <string name="action_sign_in">Entrar</string>
+    <string name="register">Cadastrar</string>
     <string name="error_invalid_email">E-mail inválido</string>
     <string name="error_invalid_password">Senha muito curta</string>
     <string name="error_incorrect_password">Senha incorreta</string>

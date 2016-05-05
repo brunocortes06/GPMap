@@ -4,7 +4,7 @@
     tools:context="com.firebase.samples.logindemo.MainActivity">
     <item
         android:id="@+id/action_register"
-        android:title="@string/action_register"
+        android:title="@string/register"
         android:orderInCategory="100"
         app:showAsAction="always" />
 </menu>

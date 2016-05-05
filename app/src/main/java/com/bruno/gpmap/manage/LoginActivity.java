@@ -145,50 +145,50 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView.requestFocus();
         } else {
 
-            try {
-                final Firebase ref = new Firebase("https://gpmap.firebaseio.com");
-                ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
-                    @Override
-                    public void onAuthenticated(AuthData authData) {
-                        // Authentication just completed successfully :)
-                        Map<String, String> map = new HashMap<String, String>();
-                        map.put("provider", authData.getProvider());
-                        if(authData.getProviderData().containsKey("displayName")) {
-                            map.put("displayName", authData.getProviderData().get("displayName").toString());
-                        }
-                        ref.child("users").child(authData.getUid()).setValue(map);
-                    }
-                    @Override
-                    public void onAuthenticationError(FirebaseError firebaseError) {
-                        showErrorDialog(firebaseError.toString());
-                        errorCorde = firebaseError.getCode();
-                        switch (errorCorde) {
-                            case FirebaseError.USER_DOES_NOT_EXIST:
-                                // handle a non existing user
-                                Toast.makeText(LoginActivity.this,"Usuário inválido", Toast.LENGTH_LONG).show();
-                                break;
-                            case FirebaseError.INVALID_PASSWORD:
-                                // handle an invalid password
-                                System.out.println("Senha inválida");
-                                break;
-                            default:
-                                // handle other errors
-                                System.out.println("Erro no login");
-                                break;
-                        }
-
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                final Firebase ref = new Firebase("https://gpmap.firebaseio.com");
+//                ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
+//                    @Override
+//                    public void onAuthenticated(AuthData authData) {
+//                        // Authentication just completed successfully :)
+//                        Map<String, String> map = new HashMap<String, String>();
+//                        map.put("provider", authData.getProvider());
+//                        if(authData.getProviderData().containsKey("displayName")) {
+//                            map.put("displayName", authData.getProviderData().get("displayName").toString());
+//                        }
+//                        ref.child("users").child(authData.getUid()).setValue(map);
+//                    }
+//                    @Override
+//                    public void onAuthenticationError(FirebaseError firebaseError) {
+//                        showErrorDialog(firebaseError.toString());
+//                        errorCorde = firebaseError.getCode();
+//                        switch (errorCorde) {
+//                            case FirebaseError.USER_DOES_NOT_EXIST:
+//                                // handle a non existing user
+//                                Toast.makeText(LoginActivity.this,"Usuário inválido", Toast.LENGTH_LONG).show();
+//                                break;
+//                            case FirebaseError.INVALID_PASSWORD:
+//                                // handle an invalid password
+//                                System.out.println("Senha inválida");
+//                                break;
+//                            default:
+//                                // handle other errors
+//                                System.out.println("Erro no login");
+//                                break;
+//                        }
+//
+//                    }
+//                });
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
 
 
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-//            showProgress(true);
-//            mAuthTask = new UserLoginTask(email, password);
-//            mAuthTask.execute((Void) null);
+            showProgress(true);
+            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask.execute((Void) null);
         }
     }
 
@@ -329,38 +329,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                final Firebase ref = new Firebase("https://gpmap.firebaseio.com");
-                ref.authWithPassword(mEmail, mPassword, new Firebase.AuthResultHandler() {
-                    @Override
-                    public void onAuthenticated(AuthData authData) {
-                        // Authentication just completed successfully :)
-                        Map<String, String> map = new HashMap<String, String>();
-                        map.put("provider", authData.getProvider());
-                        if(authData.getProviderData().containsKey("displayName")) {
-                            map.put("displayName", authData.getProviderData().get("displayName").toString());
-                        }
-                        ref.child("users").child(authData.getUid()).setValue(map);
-                    }
-                    @Override
-                    public void onAuthenticationError(FirebaseError firebaseError) {
-                        errorCorde = firebaseError.getCode();
-                        switch (errorCorde) {
-                            case FirebaseError.USER_DOES_NOT_EXIST:
-                                // handle a non existing user
-                                Toast.makeText(LoginActivity.this,"Usuário inválido", Toast.LENGTH_LONG).show();
-                                break;
-                            case FirebaseError.INVALID_PASSWORD:
-                                // handle an invalid password
-                                System.out.println("Senha inválida");
-                                break;
-                            default:
-                                // handle other errors
-                                System.out.println("Erro no login");
-                                break;
-                        }
-
-                    }
-                });
             } catch (Exception e) {
                 return false;
             }
@@ -369,9 +337,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected void onPostExecute(final Boolean success) {
-//            dialogCreateUser();
-//            CreateUser createUser = new CreateUser();
-//            createUser.createUser(mEmail, mPassword);
             mAuthTask = null;
             showProgress(false);
 
