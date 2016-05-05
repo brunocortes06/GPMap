@@ -26,6 +26,7 @@ public class Register extends AppCompatActivity {
     private EditText mPasswordView;
     private EditText mFullName;
     private View mLoginFormView;
+    private Spinner spGender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,23 +40,7 @@ public class Register extends AppCompatActivity {
 
         mFullName = (EditText) findViewById(R.id.name);
 
-        Spinner sp = (Spinner)findViewById(R.id.gender);
-        sp.setSelection(0);
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                if(position > 0){
-                    // get spinner value
-                }else{
-                    // show toast select gender
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
+        spGender = (Spinner)findViewById(R.id.gender);
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
@@ -71,44 +56,21 @@ public class Register extends AppCompatActivity {
     private void attemptRegister() {
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String gender = spGender.getSelectedItem().toString();
 
         try {
-            createRegister(email);
-//            Firebase ref = new Firebase("https://gpmap.firebaseio.com");
-//            ref.createUser(email, password, new Firebase.ValueResultHandler<Map<String, Object>>() {
-//                @Override
-//                public void onSuccess(Map<String, Object> result) {
-//                    Toast.makeText(Register.this,"Successfully created user account with uid: " + result.get("uid"), Toast.LENGTH_LONG).show();
-//                    System.out.println("Successfully created user account with uid: " + result.get("uid"));
-//                }
-//                @Override
-//                public void onError(FirebaseError firebaseError) {
-//                    switch (firebaseError.getCode()) {
-//                        case FirebaseError.USER_DOES_NOT_EXIST:
-//                            // handle a non existing user
-//                            Toast.makeText(Register.this,"Usuário inválido", Toast.LENGTH_LONG).show();
-//                            break;
-//                        case FirebaseError.INVALID_PASSWORD:
-//                            // handle an invalid password
-//                            System.out.println("Senha inválida");
-//                            break;
-//                        default:
-//                            // handle other errors
-//                            System.out.println("Erro no login");
-//                            break;
-//                    }
-//                    System.out.println("ERRO");
-//                }
-//            });
+            createRegister(email, gender);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
-}
-    private void createRegister(String email){
+    }
+    private void createRegister(String email, String gender){
         final Firebase ref = new Firebase("https://gpmap.firebaseio.com");
-        ref.child("users").setValue(email);
+        ref.child("users").setValue("email");
+        ref.child("users").child("email").setValue(email);
+        ref.child("users").child("gender").setValue(gender);
     }
 
     public void showDatePickerDialog(View v) {
@@ -118,7 +80,6 @@ public class Register extends AppCompatActivity {
 
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
-
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the current date as the default date in the picker
