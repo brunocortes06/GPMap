@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.bruno.gpmap.MapsActivity;
 import com.bruno.gpmap.R;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
@@ -163,40 +164,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 Toast.makeText(LoginActivity.this, "Usuário Logado com sucesso!", Toast.LENGTH_LONG).show();;
 
+                Intent intent = new Intent(this, MapsActivity.class);
+//                EditText editText = (EditText) findViewById(R.id.edit_message);
+//                String message = editText.getText().toString();
+                //TODO PutExtra pode passar um objeto pra outra atividade, nesse caso tenho q passar o usuario
+//                intent.putExtra(EXTRA_MESSAGE, message);
+                startActivity(intent);
+
                 finish();
-//                final Firebase ref = new Firebase("https://gpmap.firebaseio.com");
-//                ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
-//                    @Override
-//                    public void onAuthenticated(AuthData authData) {
-//                        // Authentication just completed successfully :)
-//                        Map<String, String> map = new HashMap<String, String>();
-//                        map.put("provider", authData.getProvider());
-//                        if(authData.getProviderData().containsKey("displayName")) {
-//                            map.put("displayName", authData.getProviderData().get("displayName").toString());
-//                        }
-//                        ref.child("users").child(authData.getUid()).setValue(map);
-//                    }
-//                    @Override
-//                    public void onAuthenticationError(FirebaseError firebaseError) {
-//                        showErrorDialog(firebaseError.toString());
-//                        errorCorde = firebaseError.getCode();
-//                        switch (errorCorde) {
-//                            case FirebaseError.USER_DOES_NOT_EXIST:
-//                                // handle a non existing user
-//                                Toast.makeText(LoginActivity.this,"Usuário inválido", Toast.LENGTH_LONG).show();
-//                                break;
-//                            case FirebaseError.INVALID_PASSWORD:
-//                                // handle an invalid password
-//                                System.out.println("Senha inválida");
-//                                break;
-//                            default:
-//                                // handle other errors
-//                                System.out.println("Erro no login");
-//                                break;
-//                        }
-//
-//                    }
-//                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
