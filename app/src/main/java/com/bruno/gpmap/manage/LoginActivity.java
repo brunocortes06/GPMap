@@ -145,7 +145,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView.requestFocus();
         } else {
 
-//            try {
+            showProgress(true);
+
+            try {
+                final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+                String emailRec = ref.child(email).getKey();
+                if(emailRec == null) {
+                    Toast.makeText(LoginActivity.this, "Usuário inválido", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                String passRec = ref.child(email).child("password").child(password).getKey();;
+                if(passRec == null) {
+                    Toast.makeText(LoginActivity.this, "Senha inválida", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                Toast.makeText(LoginActivity.this, "Usuário Logado com sucesso!", Toast.LENGTH_LONG).show();;
+
+                finish();
 //                final Firebase ref = new Firebase("https://gpmap.firebaseio.com");
 //                ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
 //                    @Override
@@ -179,16 +197,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //
 //                    }
 //                });
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+//            showProgress(true);
+//            mAuthTask = new UserLoginTask(email, password);
+//            mAuthTask.execute((Void) null);
         }
     }
 
@@ -198,7 +216,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
+        //
+        // TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -341,26 +360,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                if(errorCorde != 0){
-                    switch (errorCorde) {
-                        case FirebaseError.USER_DOES_NOT_EXIST:
-                            // handle a non existing user
-                            Toast.makeText(LoginActivity.this, "Usuário inválido", Toast.LENGTH_LONG).show();
-                            break;
-                        case FirebaseError.INVALID_PASSWORD:
-                            // handle an invalid password
-                            System.out.println("Senha inválida");
-                            break;
-                        default:
-                            // handle other errors
-                            System.out.println("Erro no login");
-                            break;
-                    }
-                }else{
-                    finish();
-                }
-//                finish();
-            } else {
+                finish();
+        } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }

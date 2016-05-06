@@ -85,6 +85,14 @@
                 android:prompt="@id/gender"
                 android:entries="@array/gender"/>
 
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/height"
+                android:layout_gravity="center_horizontal"
+                android:prompt="@id/height"
+                android:entries="@array/height"/>
+
             <Button
                 android:id="@+id/email_sign_in_button"
                 style="?android:textAppearanceSmall"
