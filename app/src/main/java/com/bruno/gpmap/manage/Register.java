@@ -2,11 +2,11 @@ package com.bruno.gpmap.manage;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -18,6 +18,9 @@ import com.bruno.gpmap.GPSTracker;
 import com.bruno.gpmap.R;
 import com.firebase.client.Firebase;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 
 public class Register extends AppCompatActivity {
@@ -88,36 +91,55 @@ public class Register extends AppCompatActivity {
         if(spHeight.getSelectedItemPosition() <=0)
             Toast.makeText(Register.this, getString(R.string.select_height), Toast.LENGTH_SHORT).show();
 
-
-//        spGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> main, View view, int position,
-//                                       long Id) {
-//                if (position <= 0) {
-//                }
-//            }
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//            }
-//        });
-
         try {
-            createRegister(email,name, password, gender, height);
+            if(createRegister(email,name, password, gender, height)){
+                Toast.makeText(Register.this, getString(R.string.title_activity_register_success), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Register.this, LoginActivity.class);
+                startActivity(intent);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
     }
-    private void createRegister(String email, String name, String password, String gender, String height){
-        final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
-        ref.child("email").setValue(email);
-        ref.setValue(email);
-        ref.child(email).child("name").setValue(name);
-        ref.child(email).child("password").setValue(password);
-        ref.child(email).child("gender").setValue(gender);
-        ref.child(email).child("height").setValue(height);
+    private boolean createRegister(String email, String name, String password, String gender, String height){
+        try {
+            final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+            ref.child(email).child("name").setValue(name);
+            ref.child(email).child("gender").setValue(gender);
+            ref.child(email).child("height").setValue(height);
+            ref.child(email).child("lat").setValue(latitude);
+            ref.child(email).child("lng").setValue(longitude);
+
+            //Criptografar senha
+            String encripted = encriptMessage(password);
+            ref.child(email).child("password").setValue(encripted);
+        }catch (Exception e){
+            e.printStackTrace();;
+            return false;
+        }
+        return true;
+    }
+
+    private String encriptMessage(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        byte messageDigest[] = new byte[0];
+        String senha = null;
+        try {
+            MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
+            messageDigest = algorithm.digest(password.getBytes("UTF-8"));
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : messageDigest) {
+                hexString.append(String.format("%02X", 0xFF & b));
+            }
+            senha = hexString.toString();
+
+        }catch (NoSuchAlgorithmException n){
+            n.printStackTrace();
+        }
+        return senha;
     }
 
     public void showDatePickerDialog(View v) {

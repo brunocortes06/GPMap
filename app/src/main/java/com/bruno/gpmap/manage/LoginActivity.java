@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -24,6 +23,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -32,16 +33,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.bruno.gpmap.MapsActivity;
 import com.bruno.gpmap.R;
-import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 
 /**
@@ -59,9 +62,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-    private AlertDialog alerta;
-    private int errorCorde = 0;
-
+    private boolean valid = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        final String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -140,38 +141,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
 
+//        boolean[] validLogin = validateEmail(email);
+////        validateEmail1(email);
+//        validLogin= validatePassword(email);
+
+//
+//        if(emailRec[0].equals(null)) {
+//            Toast.makeText(LoginActivity.this, "Usuário inválido", Toast.LENGTH_LONG).show();
+//            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+//            mEmailView.startAnimation(shake);
+//            focusView = mEmailView;
+////            cancel=true;
+////            return;
+//        }
+//
+//        if(passRec[0].equals(null)) {
+//            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+//            mPasswordView.startAnimation(shake);
+//            Toast.makeText(LoginActivity.this, "Senha inválida", Toast.LENGTH_LONG).show();
+//            focusView = mPasswordView;
+////            cancel=true;
+//        }
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
         } else {
 
-            showProgress(true);
+//            showProgress(true);
 
             try {
-                final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
-                String emailRec = ref.child(email).getKey();
-                if(emailRec == null) {
-                    Toast.makeText(LoginActivity.this, "Usuário inválido", Toast.LENGTH_LONG).show();
-                    return;
-                }
 
-                String passRec = ref.child(email).child("password").child(password).getKey();;
-                if(passRec == null) {
-                    Toast.makeText(LoginActivity.this, "Senha inválida", Toast.LENGTH_LONG).show();
-                    return;
-                }
 
-                Toast.makeText(LoginActivity.this, "Usuário Logado com sucesso!", Toast.LENGTH_LONG).show();;
-
-                Intent intent = new Intent(this, MapsActivity.class);
-//                EditText editText = (EditText) findViewById(R.id.edit_message);
-//                String message = editText.getText().toString();
-                //TODO PutExtra pode passar um objeto pra outra atividade, nesse caso tenho q passar o usuario
-//                intent.putExtra(EXTRA_MESSAGE, message);
-                startActivity(intent);
-
-                finish();
+//                finish();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -180,9 +183,65 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
 //            showProgress(true);
-//            mAuthTask = new UserLoginTask(email, password);
-//            mAuthTask.execute((Void) null);
+            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask.execute((Void) null);
         }
+    }
+//
+//    private void validateEmail1(String email) {
+//        final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+//        mListAdapter = new FirebaseListAdapter<User>(LoginActivity.this, User.class, R.layout.activity_login, ref) {
+//            @Override
+//            protected void populateView(View v, User model, int position) {
+//                super.populateView(v, model, position);
+//                String teste = model.getGender();
+//            }
+//        };
+//    }
+
+    private boolean[] validateEmail(final String email) {
+        final boolean[] valid = new boolean[0];
+        final String[] emailRec = new String[0];
+
+        final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if(snapshot.child(email).getValue().toString() != null) {
+                    emailRec[0] = snapshot.child(email).getKey().toString();
+                    valid[0] = true;
+                }
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+                valid[0] = false;
+            }
+        });
+        return valid;
+    }
+
+    private boolean[] validatePassword(final String email) {
+        final boolean[] valid = new boolean[0];
+        final String[] passRec = new String[0];
+
+        final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if(snapshot.child(email).child("password").getValue().toString() != null) {
+                    passRec[0] = snapshot.child(email).child("password").getValue().toString();
+                    valid[1] = true;
+                }
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+                valid[1] = false;
+            }
+        });
+        return valid;
     }
 
     private boolean isEmailValid(String email) {
@@ -235,7 +294,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         /* If a user is currently authenticated, display a logout menu */
-            getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -318,11 +377,61 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
+            showProgress(true);
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
+                final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        if(snapshot.child(mEmail).getValue() != null) {
+                            String emailRec = snapshot.child(mEmail).getKey().toString();
+                            String passRec = snapshot.child(mEmail).child("password").getValue().toString();
+                            //Descriptografasr senha
+                            String senha = null;
+                            try {
+                                byte messageDigest[] = new byte[0];
+                                MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
+                                messageDigest = algorithm.digest(mPassword.getBytes("UTF-8"));
+
+                                StringBuilder hexString = new StringBuilder();
+                                for (byte b : messageDigest) {
+                                    hexString.append(String.format("%02X", 0xFF & b));
+                                }
+                               senha = hexString.toString();
+                            } catch (NoSuchAlgorithmException e) {
+                                e.printStackTrace();
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                            if (!passRec.equals(senha)) {
+                                Toast.makeText(LoginActivity.this, "Senha inválida!", Toast.LENGTH_LONG).show();
+                                Animation shake = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.shake);
+                                mPasswordView.startAnimation(shake);
+                                valid = false;
+                                showProgress(false);
+                            }else{
+                                valid = true;
+                                Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+                                startActivity(intent);
+                            }
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Usuário ou senha inválidos!", Toast.LENGTH_LONG).show();
+                            valid = false;
+                            showProgress(false);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        System.out.println("The read failed: " + firebaseError.getMessage());
+                        valid = false;
+                        showProgress(false);
+                    }
+                });
             } catch (Exception e) {
                 return false;
             }
@@ -332,12 +441,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
+//            showProgress(false);
 
             if (success) {
-                finish();
-        } else {
+                if(valid){
+//                    Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+//                    //TODO PutExtra pode passar um objeto pra outra atividade, nesse caso tenho q passar o usuario
+////                intent.putExtra(EXTRA_MESSAGE, message);
+//                    startActivity(intent);
+                }
+
+//                finish();
+            } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
+//                mPasswordView.startAnimation(shake);
                 mPasswordView.requestFocus();
             }
         }
@@ -349,34 +466,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private void dialogCreateUser() {
-        try {
-            //Cria o gerador do AlertDialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            //define o titulo
-            builder.setTitle("Titulo");
-            //define a mensagem
-            builder.setMessage("Usário não enconrado, deseja cadastrar?");
-            //define um botão como positivo
-            builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface arg0, int arg1) {
-                    Toast.makeText(LoginActivity.this, "sim=" + arg1, Toast.LENGTH_SHORT).show();
-                }
-            });
-            //define um botão como negativo.
-            builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface arg0, int arg1) {
-                    Toast.makeText(LoginActivity.this, "nao=" + arg1, Toast.LENGTH_SHORT).show();
-                }
-            });
-            //cria o AlertDialog
-            alerta = builder.create();
-            //Exibe
-            alerta.show();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+    private String decript(String passRec) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String senha = null;
+           try {
+               MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
+               byte messageDigest[] = algorithm.digest(passRec.getBytes("UTF-8"));
+
+               StringBuilder hexString = new StringBuilder();
+               for (byte b : messageDigest) {
+                   hexString.append(String.format("%02X", 0xFF & b));
+               }
+               senha = hexString.toString();
+           } catch (NoSuchAlgorithmException e) {
+               e.printStackTrace();
+           }
+        return senha;
     }
+
     /**
      * Show errors to users
      */

@@ -17,6 +17,7 @@
     <string name="error_field_required">Campo obrigatório</string>
     <string name="permission_rationale">"Liberar acesso a contatos"</string>
     <string name="title_activity_register">Cadastro</string>
+    <string name="title_activity_register_success">Cadastro realizado com sucesso!</string>
 
     <!-- Strings related to general -->
     <string name="select_gender">Selecione o Genero</string>

@@ -3,12 +3,14 @@ package com.bruno.gpmap;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.bruno.gpmap.manage.GetUserData;
 import com.firebase.client.Firebase;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -52,6 +54,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        GetUserData usrData = new GetUserData();
+        usrData.getuser();
+
+        // Add a new marker to the map
+//        Marker marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
+//        this.markers.put(key, marker);
 
         // Add a marker in Sydney and move the camera
         LatLng local = new LatLng(latitude,longitude);
