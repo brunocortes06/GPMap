@@ -40,6 +40,10 @@
             android:label="@string/title_activity_maps" >
         </activity>
         <activity
+            android:name=".manage.MapaGeoQuery"
+            android:label="@string/title_activity_maps" >
+        </activity>
+        <activity
             android:name=".manage.LoginActivity"
             android:label="@string/title_activity_login" >
             <intent-filter>

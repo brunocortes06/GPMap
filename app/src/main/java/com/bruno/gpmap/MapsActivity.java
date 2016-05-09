@@ -1,23 +1,33 @@
 package com.bruno.gpmap;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
-import com.bruno.gpmap.manage.GetUserData;
 import com.firebase.client.Firebase;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoQuery;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private double latitude;
     private double longitude;
+    private GeoFire geoFire;
+    private GeoQuery geoQuery;
+    private Map<String,Marker> markers;
+    private Circle searchCircle;
+
+    private static final String GEO_FIRE_REF = "https://gpmap.firebaseio.com/users";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,20 +35,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Firebase.setAndroidContext(this);
         setContentView(R.layout.activity_maps);
 
+        // Obter o latLong do usuario
         GPSTracker gps;
-
         gps = new GPSTracker(MapsActivity.this);
 
         // check if GPS enabled
         if(gps.canGetLocation()) {
-             latitude = gps.getLatitude();
-             longitude = gps.getLongitude();
+            latitude = gps.getLatitude();
+            longitude = gps.getLongitude();
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
     }
 
 
@@ -54,8 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        GetUserData usrData = new GetUserData();
-        usrData.getuser();
+//        GetUserData usrData = new GetUserData();
+//        usrData.getuser();
 
         // Add a new marker to the map
 //        Marker marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
@@ -68,4 +79,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
+
+
 }

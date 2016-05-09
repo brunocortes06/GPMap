@@ -141,63 +141,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
 
-//        boolean[] validLogin = validateEmail(email);
-////        validateEmail1(email);
-//        validLogin= validatePassword(email);
-
-//
-//        if(emailRec[0].equals(null)) {
-//            Toast.makeText(LoginActivity.this, "Usuário inválido", Toast.LENGTH_LONG).show();
-//            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-//            mEmailView.startAnimation(shake);
-//            focusView = mEmailView;
-////            cancel=true;
-////            return;
-//        }
-//
-//        if(passRec[0].equals(null)) {
-//            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
-//            mPasswordView.startAnimation(shake);
-//            Toast.makeText(LoginActivity.this, "Senha inválida", Toast.LENGTH_LONG).show();
-//            focusView = mPasswordView;
-////            cancel=true;
-//        }
-
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
         } else {
-
-//            showProgress(true);
-
-            try {
-
-
-//                finish();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-//            showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
     }
-//
-//    private void validateEmail1(String email) {
-//        final Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
-//        mListAdapter = new FirebaseListAdapter<User>(LoginActivity.this, User.class, R.layout.activity_login, ref) {
-//            @Override
-//            protected void populateView(View v, User model, int position) {
-//                super.populateView(v, model, position);
-//                String teste = model.getGender();
-//            }
-//        };
-//    }
 
     private boolean[] validateEmail(final String email) {
         final boolean[] valid = new boolean[0];
@@ -416,8 +368,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 showProgress(false);
                             }else{
                                 valid = true;
-                                Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+                                Intent intent = new Intent(LoginActivity.this, MapaGeoQuery.class);
                                 startActivity(intent);
+//                                Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+//                                startActivity(intent);
                             }
                         } else {
                             Toast.makeText(LoginActivity.this, "Usuário ou senha inválidos!", Toast.LENGTH_LONG).show();
@@ -441,17 +395,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-//            showProgress(false);
 
             if (success) {
-                if(valid){
 //                    Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
 //                    //TODO PutExtra pode passar um objeto pra outra atividade, nesse caso tenho q passar o usuario
 ////                intent.putExtra(EXTRA_MESSAGE, message);
 //                    startActivity(intent);
-                }
-
-//                finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
 //                mPasswordView.startAnimation(shake);
@@ -464,23 +413,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
-    }
-
-    private String decript(String passRec) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        String senha = null;
-           try {
-               MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
-               byte messageDigest[] = algorithm.digest(passRec.getBytes("UTF-8"));
-
-               StringBuilder hexString = new StringBuilder();
-               for (byte b : messageDigest) {
-                   hexString.append(String.format("%02X", 0xFF & b));
-               }
-               senha = hexString.toString();
-           } catch (NoSuchAlgorithmException e) {
-               e.printStackTrace();
-           }
-        return senha;
     }
 
     /**
