@@ -1,4 +1,4 @@
-package com.bruno.gpmap.manage;
+package com.bruno.gpmap.model;
 
 
 /**

@@ -9,31 +9,32 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
-import com.bruno.gpmap.map.MapsActivity;
-import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
-public class LoginActivity extends AppCompatActivity
+import java.util.Map;
+
+public class RegisterActivity extends AppCompatActivity
 {
 
     private Firebase firebase;
 
-    private EditText emailEditText;
+    EditText emailEditText;
 
-    private EditText passwordEditText;
+    EditText passwordEditText;
 
-    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler()
+    private Firebase.ValueResultHandler<Map<String, Object>> registerCallback
+        = new Firebase.ValueResultHandler<Map<String, Object>>()
     {
 
         @Override
-        public void onAuthenticated (AuthData authData)
+        public void onSuccess (Map<String, Object> stringObjectMap)
         {
-            goMapActivity(authData.getUid());
+            finishRegister();
         }
 
         @Override
-        public void onAuthenticationError (FirebaseError firebaseError)
+        public void onError (FirebaseError firebaseError)
         {
             showError();
         }
@@ -44,41 +45,37 @@ public class LoginActivity extends AppCompatActivity
         Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
     }
 
-    private void goMapActivity (String uid)
+    private void finishRegister ()
     {
         finish();
-        MapsActivity.start(this, uid);
     }
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
         emailEditText = (EditText) findViewById(R.id.email);
         passwordEditText = (EditText) findViewById(R.id.password);
 
         Firebase.setAndroidContext(this);
         firebase = new Firebase("https://gpmap.firebaseio.com/");
-
-    }
-
-    public void login (View view)
-    {
-        String email = emailEditText.getText().toString();
-        String password = passwordEditText.getText().toString();
-        firebase.authWithPassword(email, password, authCallback);
     }
 
     public void register (View view)
     {
-        RegisterActivity.start(this);
+        String email = emailEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
+        firebase.createUser(email, password, registerCallback);
+        //            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
+//            mEmailView.startAnimation(shake);
+//            focusView = mEmailView;
     }
 
     public static void start (Context context)
     {
-        Intent intent = new Intent(context, LoginActivity.class);
+        Intent intent = new Intent(context, RegisterActivity.class);
         context.startActivity(intent);
     }
 }
