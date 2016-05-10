@@ -1,35 +1,42 @@
 package com.bruno.gpmap.map;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 
 import com.bruno.gpmap.GPSTracker;
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.manage.LoginActivity;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 @SuppressWarnings ("ResourceType") public class MapsActivity extends FragmentActivity
-        implements OnMapReadyCallback
+        implements OnMapReadyCallback, GeoQueryEventListener, GoogleMap.OnCameraChangeListener
 {
 
     private GoogleMap mMap;
@@ -38,14 +45,18 @@ import java.util.HashMap;
     private String uid;
     private double lat;
     private double lng;
+    private GeoQuery geoQuery;
+    private HashMap<String, Marker> markers;
+    private GeoFire geoFire;
+    private Toolbar mToolbar;
 
+    private static final String GEO_FIRE_REF = "https://gpmap.firebaseio.com/locations";
     private LocationListener locationCallback = new LocationListener()
     {
 
         @Override
         public void onLocationChanged (Location location)
         {
-            updateLocation(location.getLatitude(), location.getLongitude());
             updateFirebaseLocation(location.getLatitude(), location.getLongitude());
         }
 
@@ -68,66 +79,11 @@ import java.util.HashMap;
         }
     };
 
-    private ChildEventListener childLocationCalback = new ChildEventListener()
-    {
-
-        @Override
-        public void onChildAdded (DataSnapshot dataSnapshot, String s)
-        {
-
-        }
-
-        @Override
-        public void onChildChanged (DataSnapshot dataSnapshot, String s)
-        {
-            HashMap values = (HashMap) dataSnapshot.getValue();
-            String g = (String) values.get("g");
-            ArrayList l = (ArrayList) values.get("l");
-            addMarker(g, Double.parseDouble(l.get(0).toString()),
-                    Double.parseDouble(l.get(1).toString()));
-        }
-
-        @Override
-        public void onChildRemoved (DataSnapshot dataSnapshot)
-        {
-
-        }
-
-        @Override
-        public void onChildMoved (DataSnapshot dataSnapshot, String s)
-        {
-
-        }
-
-        @Override
-        public void onCancelled (FirebaseError firebaseError)
-        {
-
-        }
-    };
-
-    private void addMarker (String g, double latitude, double longitude)
-    {
-        LatLng latlng = new LatLng(latitude, longitude);
-        MarkerOptions markerOptions = new MarkerOptions().position(latlng);
-        mMap.addMarker(markerOptions);
-    }
-
     private void updateFirebaseLocation (double latitude, double longitude)
     {
         GeoFire geoFire = new GeoFire(firebase.child("locations"));
         GeoLocation geoLocation = new GeoLocation(latitude, longitude);
         geoFire.setLocation(uid, geoLocation);
-    }
-
-    private void updateLocation (double latitude, double longitude)
-    {
-        LatLng latlng = new LatLng(latitude, longitude);
-        MarkerOptions markerOptions = new MarkerOptions().position(latlng);
-        mMap.clear();
-        //Marker vermelho
-        mMap.addMarker(markerOptions);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 15));
     }
 
     @Override
@@ -151,12 +107,18 @@ import java.util.HashMap;
 
         uid = getIntent().getExtras().getString("uid");
 
-        showUsers();
-    }
+        // setup GeoFire
+        this.geoFire = new GeoFire(new Firebase(GEO_FIRE_REF));
+        // radius in km
+//        GeoLocation geoLocation = new GeoLocation(lat, lng);
+        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(lat, lng), 1);
 
-    private void showUsers ()
-    {
-        firebase.child("locations").addChildEventListener(childLocationCalback);
+        // setup markers
+        this.markers = new HashMap<String, Marker>();
+
+//        mToolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+//        setSupportActionBar(toolbar);
+
     }
 
     @Override
@@ -165,6 +127,8 @@ import java.util.HashMap;
         getMenuInflater().inflate(R.menu.maps, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected (MenuItem item)
@@ -188,17 +152,16 @@ import java.util.HashMap;
     {
         mMap = googleMap;
         LatLng local = new LatLng(lat,lng);
-//        mMap.addMarker(new MarkerOptions().position(local).title("Estou Aqui"));
         locationmanager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, locationCallback);
         LatLng latlng = new LatLng(lat, lng);
-        MarkerOptions markerOptions = new MarkerOptions().position(latlng);
         mMap.clear();
-        mMap.addMarker(markerOptions);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 15));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local,15));
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        updateFirebaseLocation(lat, lng);
     }
 
     public static void start (Context context, String uid)
@@ -206,5 +169,105 @@ import java.util.HashMap;
         Intent intent = new Intent(context, MapsActivity.class);
         intent.putExtra("uid", uid);
         context.startActivity(intent);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // add an event listener to start updating locations again
+        this.geoQuery.addGeoQueryEventListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // remove all event listeners to stop updating in the background
+        this.geoQuery.removeAllListeners();
+        for (Marker marker: this.markers.values()) {
+            marker.remove();
+        }
+        this.markers.clear();
+    }
+
+    //Metodos do listener  GeoQuery
+    @Override
+    public void onKeyEntered(String key, GeoLocation location) {
+        Marker marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
+        this.markers.put(key, marker);
+    }
+
+    @Override
+    public void onKeyExited(String key) {
+        // Remove any old marker
+        Marker marker = this.markers.get(key);
+        if (marker != null) {
+            marker.remove();
+            this.markers.remove(key);
+        }
+    }
+
+    @Override
+    public void onKeyMoved(String key, GeoLocation location) {
+        // Move the marker
+        Marker marker = this.markers.get(key);
+        if (marker != null) {
+            this.animateMarkerTo(marker, location.latitude, location.longitude);
+        }
+    }
+
+    @Override
+    public void onGeoQueryReady() {
+
+    }
+
+    @Override
+    public void onGeoQueryError(FirebaseError error) {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage("There was an unexpected error querying GeoFire: " + error.getMessage())
+                .setPositiveButton(android.R.string.ok, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        // Update the search criteria for this geoQuery and the circle on the map
+        LatLng center = cameraPosition.target;
+        double radius = zoomLevelToRadius(cameraPosition.zoom);
+        this.geoQuery.setCenter(new GeoLocation(center.latitude, center.longitude));
+        // radius in km
+        this.geoQuery.setRadius(radius/1000);
+    }
+
+    private double zoomLevelToRadius(double zoomLevel) {
+        // Approximation to fit circle into view
+        return 16384000/Math.pow(2, zoomLevel);
+    }
+
+    // Animation handler for old APIs without animation support
+    private void animateMarkerTo(final Marker marker, final double lat, final double lng) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final long DURATION_MS = 3000;
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final LatLng startPosition = marker.getPosition();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                float elapsed = SystemClock.uptimeMillis() - start;
+                float t = elapsed/DURATION_MS;
+                float v = interpolator.getInterpolation(t);
+
+                double currentLat = (lat - startPosition.latitude) * v + startPosition.latitude;
+                double currentLng = (lng - startPosition.longitude) * v + startPosition.longitude;
+                marker.setPosition(new LatLng(currentLat, currentLng));
+
+                // if animation is not finished yet, repeat
+                if (t < 1) {
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 }
