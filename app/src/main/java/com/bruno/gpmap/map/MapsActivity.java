@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.bruno.gpmap.GPSTracker;
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.manage.LoginActivity;
 import com.firebase.client.ChildEventListener;
@@ -32,12 +33,11 @@ import java.util.HashMap;
 {
 
     private GoogleMap mMap;
-
     private LocationManager locationmanager;
-
     private Firebase firebase;
-
     private String uid;
+    private double lat;
+    private double lng;
 
     private LocationListener locationCallback = new LocationListener()
     {
@@ -125,6 +125,7 @@ import java.util.HashMap;
         LatLng latlng = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions().position(latlng);
         mMap.clear();
+        //Marker vermelho
         mMap.addMarker(markerOptions);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 15));
     }
@@ -137,6 +138,13 @@ import java.util.HashMap;
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        GPSTracker gps = new GPSTracker(this);
+        // check if GPS enabled
+        if(gps.canGetLocation()) {
+            lat = gps.getLatitude();
+            lng = gps.getLongitude();
+        }
 
         Firebase.setAndroidContext(this);
         firebase = new Firebase("https://gpmap.firebaseio.com/");
@@ -179,9 +187,18 @@ import java.util.HashMap;
     public void onMapReady (GoogleMap googleMap)
     {
         mMap = googleMap;
+        LatLng local = new LatLng(lat,lng);
+//        mMap.addMarker(new MarkerOptions().position(local).title("Estou Aqui"));
         locationmanager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationmanager
-                .requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, locationCallback);
+        locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, locationCallback);
+        LatLng latlng = new LatLng(lat, lng);
+        MarkerOptions markerOptions = new MarkerOptions().position(latlng);
+        mMap.clear();
+        mMap.addMarker(markerOptions);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local,15));
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
     public static void start (Context context, String uid)
