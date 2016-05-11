@@ -42,10 +42,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".manage.RegisterActivity"></activity>
+        <activity android:name=".manage.RegisterActivity" />
         <activity
             android:name=".map.MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
     </application>
 
 </manifest>

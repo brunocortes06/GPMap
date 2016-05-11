@@ -9,7 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +35,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
 
-@SuppressWarnings ("ResourceType") public class MapsActivity extends FragmentActivity
+@SuppressWarnings ("ResourceType") public class MapsActivity extends AppCompatActivity
         implements OnMapReadyCallback, GeoQueryEventListener, GoogleMap.OnCameraChangeListener
 {
 
@@ -116,8 +116,8 @@ import java.util.HashMap;
         // setup markers
         this.markers = new HashMap<String, Marker>();
 
-//        mToolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
-//        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
+        setSupportActionBar(mToolbar);
 
     }
 
