@@ -22,4 +22,6 @@
     <!-- Strings related to general -->
     <string name="select_gender">Selecione o Genero</string>
     <string name="select_height">Selecione a Altura</string>
+    <string name="logout">Logout</string>
+    <string name="complete_reg">Completar Cadastro</string>
 </resources>

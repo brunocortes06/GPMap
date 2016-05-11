@@ -15,8 +15,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.Toast;
 
-import com.bruno.gpmap.GPSTracker;
+import com.bruno.gpmap.util.GPSTracker;
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.manage.LoginActivity;
 import com.firebase.client.Firebase;
@@ -136,6 +137,10 @@ import java.util.HashMap;
         if (item.getItemId() == R.id.logout_option)
         {
             logout();
+        }
+        if (item.getItemId() == R.id.complete_reg)
+        {
+            Toast.makeText(this, "Completar Cadastro", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }

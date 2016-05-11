@@ -1,4 +1,4 @@
-package com.bruno.gpmap;
+package com.bruno.gpmap.util;
 
 import android.app.AlertDialog;
 import android.app.Service;
