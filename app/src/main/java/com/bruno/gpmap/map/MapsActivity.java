@@ -3,6 +3,8 @@ package com.bruno.gpmap.map;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -10,23 +12,20 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AbsoluteLayout;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bruno.gpmap.CompleteRegister;
 import com.bruno.gpmap.util.GPSTracker;
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.manage.LoginActivity;
@@ -40,15 +39,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.HashMap;
-
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 @SuppressWarnings ("ResourceType") public class MapsActivity extends AppCompatActivity
         implements OnMapReadyCallback, GeoQueryEventListener, GoogleMap.OnCameraChangeListener, GoogleMap.InfoWindowAdapter
@@ -64,6 +59,11 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
     private HashMap<String, Marker> markers;
     private GeoFire geoFire;
     private Toolbar mToolbar;
+
+    private View infoWindowContainer;
+    private TextView textView;
+    private TextView button;
+    private AbsoluteLayout.LayoutParams overlayLayoutParams;
 
     private static final String GEO_FIRE_REF = "https://gpmap.firebaseio.com/locations";
     private LocationListener locationCallback = new LocationListener()
@@ -179,8 +179,17 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local,15));
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local, 15));
 
         mMap.setInfoWindowAdapter(this);
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent intent = new Intent(MapsActivity.this, CompleteRegister.class);
+                startActivity(intent);
+            }
+        });
 
         updateFirebaseLocation(lat, lng);
     }
@@ -294,11 +303,13 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
     @Override
     public View getInfoWindow(Marker marker) {
+
         return prepareInfoView(marker);
     }
 
     @Override
     public View getInfoContents(Marker marker) {
+
         return null;
     }
 
@@ -310,11 +321,29 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
         infoView.setOrientation(LinearLayout.HORIZONTAL);
         infoView.setLayoutParams(infoViewParams);
 
-        ImageView infoImageView = new ImageView(MapsActivity.this);
-        //Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
-        Drawable drawable = getResources().getDrawable(android.R.drawable.ic_dialog_map);
-        infoImageView.setImageDrawable(drawable);
-        infoView.addView(infoImageView);
+//        ImageView infoImageView = new ImageView(MapsActivity.this);
+//        //Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
+//        Drawable drawable = getResources().getDrawable(android.R.drawable.ic_dialog_map);
+//        infoImageView.setImageDrawable(drawable);
+//        infoView.addView(infoImageView);
+
+        TextView textView = new TextView(MapsActivity.this);
+        Drawable backGround = getResources().getDrawable(R.drawable.background_popup);
+//        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.background_button, 0, 0, 0);
+        textView.setBackgroundDrawable(backGround);
+        textView.setText("Nome da fulana");
+        textView.setTextSize(20);
+        textView.setTextColor(Color.RED);
+        textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+//        textView.setClickable(true);
+//        textView.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v){
+//                Intent intent = new Intent(MapsActivity.this, CompleteRegister.class);
+//                startActivity(intent);
+//            }
+//        });
+        infoView.addView(textView);
 
         LinearLayout subInfoView = new LinearLayout(MapsActivity.this);
         LinearLayout.LayoutParams subInfoViewParams = new LinearLayout.LayoutParams(
@@ -322,13 +351,13 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
         subInfoView.setOrientation(LinearLayout.VERTICAL);
         subInfoView.setLayoutParams(subInfoViewParams);
 
-        TextView subInfoLat = new TextView(MapsActivity.this);
-        subInfoLat.setText("Lat: " + marker.getPosition().latitude);
-        TextView subInfoLnt = new TextView(MapsActivity.this);
-        subInfoLnt.setText("Lnt: " + marker.getPosition().longitude);
-        subInfoView.addView(subInfoLat);
-        subInfoView.addView(subInfoLnt);
-        infoView.addView(subInfoView);
+//        TextView subInfoLat = new TextView(MapsActivity.this);
+//        subInfoLat.setText("Lat: " + marker.getPosition().latitude);
+//        TextView subInfoLnt = new TextView(MapsActivity.this);
+//        subInfoLnt.setText("Lnt: " + marker.getPosition().longitude);
+//        subInfoView.addView(subInfoLat);
+//        subInfoView.addView(subInfoLnt);
+//        infoView.addView(subInfoView);
 
         return infoView;
     }

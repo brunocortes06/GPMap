@@ -24,6 +24,21 @@
       android:hint="password"
       android:inputType="textPassword"/>
 
+  <EditText
+      android:id="@+id/name"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:hint="Nome"
+      android:inputType="textPersonName"/>
+
+  <Spinner
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/spinnerGender"
+      android:entries="@array/gender"
+      android:layout_gravity="center_horizontal"
+      android:spinnerMode="dropdown" />
+
   <Button
       android:layout_height="wrap_content"
       android:layout_width="match_parent"

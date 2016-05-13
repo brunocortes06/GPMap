@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
@@ -23,19 +24,26 @@ public class RegisterActivity extends AppCompatActivity
 
     EditText passwordEditText;
 
+    private EditText mFullName;
+
+    private Spinner spGender;
+
+    private int posGender = 0;
+
     private Firebase.ValueResultHandler<Map<String, Object>> registerCallback
-        = new Firebase.ValueResultHandler<Map<String, Object>>()
+            = new Firebase.ValueResultHandler<Map<String, Object>>()
     {
 
         @Override
         public void onSuccess (Map<String, Object> stringObjectMap)
         {
-            finishRegister();
+            finishRegister(stringObjectMap.get("uid").toString());
         }
 
         @Override
         public void onError (FirebaseError firebaseError)
         {
+
             showError();
         }
     };
@@ -45,8 +53,10 @@ public class RegisterActivity extends AppCompatActivity
         Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
     }
 
-    private void finishRegister ()
+    private void finishRegister (String uid)
     {
+        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+        ref.child(uid).child("name").setValue(mFullName.getText().toString());
         finish();
     }
 
@@ -59,15 +69,24 @@ public class RegisterActivity extends AppCompatActivity
         emailEditText = (EditText) findViewById(R.id.email);
         passwordEditText = (EditText) findViewById(R.id.password);
 
+        mFullName = (EditText) findViewById(R.id.name);
+
         Firebase.setAndroidContext(this);
         firebase = new Firebase("https://gpmap.firebaseio.com/");
+
+        spGender = (Spinner)findViewById(R.id.spinnerGender);
+        spGender.setSelection(posGender);
     }
 
     public void register (View view)
     {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
+        if(mFullName.equals(null))
+            Toast.makeText(this, "Preencha o Nome", Toast.LENGTH_SHORT).show();
+
         firebase.createUser(email, password, registerCallback);
+
         //            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
 //            mEmailView.startAnimation(shake);
 //            focusView = mEmailView;
