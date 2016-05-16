@@ -45,7 +45,10 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings ("ResourceType") public class MapsActivity extends AppCompatActivity
         implements OnMapReadyCallback, GeoQueryEventListener, GoogleMap.OnCameraChangeListener, GoogleMap.InfoWindowAdapter
@@ -60,12 +63,10 @@ import java.util.HashMap;
     private GeoQuery geoQuery;
     private HashMap<String, Marker> markers;
     private GeoFire geoFire;
-    private User userData;
+//    private Map<String, User> userData;
+    private Map<Marker, User> otherUsersData;
 
     private Toolbar mToolbar;
-    private View infoWindowContainer;
-    private TextView textView;
-    private TextView button;
 
     private AbsoluteLayout.LayoutParams overlayLayoutParams;
     private static final String GEO_FIRE_REF = "https://gpmap.firebaseio.com/locations";
@@ -113,6 +114,9 @@ import java.util.HashMap;
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+//        userData = new HashMap<>();
+        otherUsersData = new HashMap<>();
+
         GPSTracker gps = new GPSTracker(this);
         // check if GPS enabled
         if(gps.canGetLocation()) {
@@ -137,7 +141,7 @@ import java.util.HashMap;
         mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(mToolbar);
 
-        getCurrentUserData(uid);
+//        getCurrentUserData(uid);
 
     }
 
@@ -160,7 +164,11 @@ import java.util.HashMap;
         if (item.getItemId() == R.id.complete_reg)
         {
             Intent complete_reg = new Intent(MapsActivity.this, CompleteRegister.class);
+            complete_reg.putExtra("uid", uid);
             startActivity(complete_reg);
+//            Intent complete_reg = new Intent(MapsActivity.this, CompleteRegister.class);
+//            complete_reg.putExtra("User", (Serializable)otherUsersData);
+//            startActivity(complete_reg);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -230,14 +238,15 @@ import java.util.HashMap;
     public void onKeyEntered(String key, GeoLocation location) {
         Marker marker;
         if(key.equals(uid)) {
-            System.out.println("On Key entered age: "+userData.getAge());
-            System.out.println("On Key entered gender: "+userData.getGender());
-            System.out.println("On Key entered name: "+userData.getName());
+//            System.out.println("On Key entered age: "+userData.get(key).getAge());
+//            System.out.println("On Key entered gender: "+userData.get(key).getGender());
+//            System.out.println("On Key entered name: "+userData.get(key).getName());
             marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
         }else{
             marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
         }
         this.markers.put(key, marker);
+        getUserData(marker, key);
     }
 
     @Override
@@ -335,28 +344,13 @@ import java.util.HashMap;
         infoView.setOrientation(LinearLayout.HORIZONTAL);
         infoView.setLayoutParams(infoViewParams);
 
-//        ImageView infoImageView = new ImageView(MapsActivity.this);
-//        //Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
-//        Drawable drawable = getResources().getDrawable(android.R.drawable.ic_dialog_map);
-//        infoImageView.setImageDrawable(drawable);
-//        infoView.addView(infoImageView);
-
         TextView textView = new TextView(MapsActivity.this);
         Drawable backGround = getResources().getDrawable(R.drawable.background_popup);
-//        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.background_button, 0, 0, 0);
         textView.setBackgroundDrawable(backGround);
-        textView.setText(userData.getName());
+        textView.setText(otherUsersData.get(marker).getName());
         textView.setTextSize(20);
         textView.setTextColor(Color.RED);
         textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
-//        textView.setClickable(true);
-//        textView.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View v){
-//                Intent intent = new Intent(MapsActivity.this, CompleteRegister.class);
-//                startActivity(intent);
-//            }
-//        });
         infoView.addView(textView);
 
         LinearLayout subInfoView = new LinearLayout(MapsActivity.this);
@@ -365,26 +359,30 @@ import java.util.HashMap;
         subInfoView.setOrientation(LinearLayout.VERTICAL);
         subInfoView.setLayoutParams(subInfoViewParams);
 
-//        TextView subInfoLat = new TextView(MapsActivity.this);
-//        subInfoLat.setText("Lat: " + marker.getPosition().latitude);
-//        TextView subInfoLnt = new TextView(MapsActivity.this);
-//        subInfoLnt.setText("Lnt: " + marker.getPosition().longitude);
-//        subInfoView.addView(subInfoLat);
-//        subInfoView.addView(subInfoLnt);
-//        infoView.addView(subInfoView);
-
         return infoView;
     }
 
-    public void getCurrentUserData(String uid) {
+//    public void getCurrentUserData(String uid) {
+//        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+//        ref.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot snapshot) {
+//                userData.put(snapshot.getKey().toString(), snapshot.getValue(User.class));
+//            }
+//
+//            @Override
+//            public void onCancelled(FirebaseError firebaseError) {
+//                System.out.println("The read failed: " + firebaseError.getMessage());
+//            }
+//        });
+//    }
+
+    public void getUserData(final Marker marker, String key) {
         Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
-        ref.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-//                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                userData = snapshot.getValue(User.class);
-//                }
-//                System.out.println("Snap "+snapshot.getValue());
+                otherUsersData.put(marker, snapshot.getValue(User.class));
             }
 
             @Override

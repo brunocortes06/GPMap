@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="skin">
+        <item>Tom da pele</item>
+        <item>Amarela</item>
+        <item>Branca</item>
+        <item>Bronzeada</item>
+        <item>Negra</item>
+        <item>Parda</item>
+    </string-array>
+</resources>
