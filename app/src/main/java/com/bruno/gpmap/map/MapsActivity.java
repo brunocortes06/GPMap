@@ -3,7 +3,6 @@ package com.bruno.gpmap.map;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -20,17 +19,19 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AbsoluteLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bruno.gpmap.CompleteRegister;
+import com.bruno.gpmap.AdditionalInfo;
+import com.bruno.gpmap.manage.CompleteRegister;
+import com.bruno.gpmap.model.User;
 import com.bruno.gpmap.util.GPSTracker;
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.manage.LoginActivity;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -39,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -58,13 +60,14 @@ import java.util.HashMap;
     private GeoQuery geoQuery;
     private HashMap<String, Marker> markers;
     private GeoFire geoFire;
-    private Toolbar mToolbar;
+    private User userData;
 
+    private Toolbar mToolbar;
     private View infoWindowContainer;
     private TextView textView;
     private TextView button;
-    private AbsoluteLayout.LayoutParams overlayLayoutParams;
 
+    private AbsoluteLayout.LayoutParams overlayLayoutParams;
     private static final String GEO_FIRE_REF = "https://gpmap.firebaseio.com/locations";
     private LocationListener locationCallback = new LocationListener()
     {
@@ -134,6 +137,8 @@ import java.util.HashMap;
         mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(mToolbar);
 
+        getCurrentUserData(uid);
+
     }
 
     @Override
@@ -154,7 +159,8 @@ import java.util.HashMap;
         }
         if (item.getItemId() == R.id.complete_reg)
         {
-            Toast.makeText(this, "Completar Cadastro", Toast.LENGTH_SHORT).show();
+            Intent complete_reg = new Intent(MapsActivity.this, CompleteRegister.class);
+            startActivity(complete_reg);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -186,7 +192,7 @@ import java.util.HashMap;
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Intent intent = new Intent(MapsActivity.this, CompleteRegister.class);
+                Intent intent = new Intent(MapsActivity.this, AdditionalInfo.class);
                 startActivity(intent);
             }
         });
@@ -222,7 +228,15 @@ import java.util.HashMap;
     //Metodos do listener  GeoQuery
     @Override
     public void onKeyEntered(String key, GeoLocation location) {
-        Marker marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
+        Marker marker;
+        if(key.equals(uid)) {
+            System.out.println("On Key entered age: "+userData.getAge());
+            System.out.println("On Key entered gender: "+userData.getGender());
+            System.out.println("On Key entered name: "+userData.getName());
+            marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        }else{
+            marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
+        }
         this.markers.put(key, marker);
     }
 
@@ -331,7 +345,7 @@ import java.util.HashMap;
         Drawable backGround = getResources().getDrawable(R.drawable.background_popup);
 //        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.background_button, 0, 0, 0);
         textView.setBackgroundDrawable(backGround);
-        textView.setText("Nome da fulana");
+        textView.setText(userData.getName());
         textView.setTextSize(20);
         textView.setTextColor(Color.RED);
         textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
@@ -360,5 +374,23 @@ import java.util.HashMap;
 //        infoView.addView(subInfoView);
 
         return infoView;
+    }
+
+    public void getCurrentUserData(String uid) {
+        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+        ref.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+//                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                userData = snapshot.getValue(User.class);
+//                }
+//                System.out.println("Snap "+snapshot.getValue());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
     }
 }

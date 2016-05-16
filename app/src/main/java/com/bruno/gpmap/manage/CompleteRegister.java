@@ -1,7 +1,9 @@
-package com.bruno.gpmap;
+package com.bruno.gpmap.manage;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.bruno.gpmap.R;
 
 public class CompleteRegister extends AppCompatActivity {
 

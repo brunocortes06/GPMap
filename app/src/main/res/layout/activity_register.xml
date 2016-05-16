@@ -15,21 +15,34 @@
       android:id="@+id/email"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
-      android:hint="email"/>
+      android:hint="@string/prompt_email"/>
+
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal" />
 
   <EditText
       android:id="@+id/password"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
-      android:hint="password"
+      android:hint="@string/prompt_password"
       android:inputType="textPassword"/>
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal" />
 
   <EditText
       android:id="@+id/name"
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
-      android:hint="Nome"
+      android:hint="@string/name"
       android:inputType="textPersonName"/>
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal" />
 
   <Spinner
       android:layout_width="match_parent"
@@ -39,9 +52,21 @@
       android:layout_gravity="center_horizontal"
       android:spinnerMode="dropdown" />
 
+  <Spinner
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/spinnerAge"
+      android:entries="@array/age"
+      android:layout_gravity="center_horizontal" />
+
+  <Space
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal" />
+
   <Button
       android:layout_height="wrap_content"
       android:layout_width="match_parent"
       android:onClick="register"
-      android:text="Registrar"/>
+      android:text="@string/register"/>
 </LinearLayout>

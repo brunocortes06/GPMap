@@ -50,7 +50,7 @@
             android:label="@string/title_activity_maps"/>
 
         <activity
-            android:name=".CompleteRegister">
+            android:name=".manage.CompleteRegister">
         </activity>
 
         <meta-data

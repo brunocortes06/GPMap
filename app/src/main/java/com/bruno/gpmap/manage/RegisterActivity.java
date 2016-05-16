@@ -10,8 +10,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
+import com.bruno.gpmap.util.GPSTracker;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 
 import java.util.Map;
 
@@ -28,7 +31,15 @@ public class RegisterActivity extends AppCompatActivity
 
     private Spinner spGender;
 
+    private Spinner spAge;
+
     private int posGender = 0;
+
+    private int posAge = 0;
+
+    private double lat;
+
+    private double lng;
 
     private Firebase.ValueResultHandler<Map<String, Object>> registerCallback
             = new Firebase.ValueResultHandler<Map<String, Object>>()
@@ -57,6 +68,10 @@ public class RegisterActivity extends AppCompatActivity
     {
         Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
         ref.child(uid).child("name").setValue(mFullName.getText().toString());
+        ref.child(uid).child("gender").setValue(spGender.getSelectedItem().toString());
+        ref.child(uid).child("age").setValue(spAge.getSelectedItem().toString());
+
+        updateFirebaseLocation(uid, lat, lng);
         finish();
     }
 
@@ -65,6 +80,13 @@ public class RegisterActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        GPSTracker gps = new GPSTracker(this);
+        // check if GPS enabled
+        if(gps.canGetLocation()) {
+            lat = gps.getLatitude();
+            lng = gps.getLongitude();
+        }
 
         emailEditText = (EditText) findViewById(R.id.email);
         passwordEditText = (EditText) findViewById(R.id.password);
@@ -76,15 +98,30 @@ public class RegisterActivity extends AppCompatActivity
 
         spGender = (Spinner)findViewById(R.id.spinnerGender);
         spGender.setSelection(posGender);
+
+        spAge = (Spinner)findViewById(R.id.spinnerAge);
+        spAge.setSelection(posAge);
+
     }
 
     public void register (View view)
     {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
-        if(mFullName.equals(null))
-            Toast.makeText(this, "Preencha o Nome", Toast.LENGTH_SHORT).show();
+        String name = mFullName.getText().toString();
 
+        if(name.equals(null) || name.equals("")) {
+            Toast.makeText(this, "Preencha o Nome", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(spGender.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Selecione o Genero", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(spAge.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Selecione a idade", Toast.LENGTH_SHORT).show();
+            return;
+        }
         firebase.createUser(email, password, registerCallback);
 
         //            Animation shake = AnimationUtils.loadAnimation(this, R.anim.shake);
@@ -96,5 +133,12 @@ public class RegisterActivity extends AppCompatActivity
     {
         Intent intent = new Intent(context, RegisterActivity.class);
         context.startActivity(intent);
+    }
+
+    private void updateFirebaseLocation (String uid, double latitude, double longitude)
+    {
+        GeoFire geoFire = new GeoFire(firebase.child("locations"));
+        GeoLocation geoLocation = new GeoLocation(latitude, longitude);
+        geoFire.setLocation(uid, geoLocation);
     }
 }
