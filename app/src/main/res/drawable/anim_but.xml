@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android" android:oneshot="true" >
+    <item android:drawable="@drawable/botao" android:duration="20" />
+    <item android:drawable="@drawable/botao1" android:duration="20" />
+    <item android:drawable="@drawable/botao2" android:duration="20" />
+    <item android:drawable="@drawable/botao3" android:duration="20" />
+    <item android:drawable="@drawable/botao4" android:duration="20" />
+    <item android:drawable="@drawable/botao5" android:duration="20" />
+    <item android:drawable="@drawable/botao6" android:duration="20" />
+    <item android:drawable="@drawable/botao7" android:duration="20" />
+    <item android:drawable="@drawable/botao8" android:duration="20" />
+    <item android:drawable="@drawable/botao9" android:duration="20" />
+    <item android:drawable="@drawable/botao10" android:duration="20" />
+    <item android:drawable="@drawable/botao11" android:duration="20" />
+    <item android:drawable="@drawable/botao12" android:duration="20" />
+    <item android:drawable="@drawable/botao13" android:duration="20" />
+    <item android:drawable="@drawable/botao14" android:duration="20" />
+    <item android:drawable="@drawable/botao15" android:duration="20" />
+    <item android:drawable="@drawable/botao16" android:duration="20" />
+    <item android:drawable="@drawable/botao17" android:duration="20" />
+    <item android:drawable="@drawable/botao18" android:duration="20" />
+    <item android:drawable="@drawable/botao19" android:duration="20" />
+    <item android:drawable="@drawable/botao20" android:duration="20" />
+    <item android:drawable="@drawable/botao21" android:duration="20" />
+</animation-list>
