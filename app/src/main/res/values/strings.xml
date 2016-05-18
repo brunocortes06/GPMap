@@ -24,4 +24,5 @@
     <string name="select_height">Selecione a Altura</string>
     <string name="logout">Logout</string>
     <string name="complete_reg">Completar Cadastro</string>
+    <string name="description">Descrição</string>
 </resources>

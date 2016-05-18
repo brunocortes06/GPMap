@@ -68,7 +68,6 @@ import java.util.Map;
 
     private Toolbar mToolbar;
 
-    private AbsoluteLayout.LayoutParams overlayLayoutParams;
     private static final String GEO_FIRE_REF = "https://gpmap.firebaseio.com/locations";
     private LocationListener locationCallback = new LocationListener()
     {

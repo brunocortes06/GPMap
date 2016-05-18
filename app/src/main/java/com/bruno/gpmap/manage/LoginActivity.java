@@ -11,6 +11,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,6 +39,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private View mLoginFormView;
 
     private View mProgressView;
+
+    private Toolbar mToolbar;
 
     private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
 
@@ -89,6 +94,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
+        setSupportActionBar(mToolbar);
     }
 
 
@@ -172,5 +180,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.cad, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected (MenuItem item)
+    {
+        if (item.getItemId() == R.id.reg)
+        {
+            Intent complete_reg = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(complete_reg);
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
