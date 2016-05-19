@@ -6,12 +6,13 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,17 +21,24 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
-import com.bruno.gpmap.map.MapsActivity;
-import com.firebase.client.AuthData;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.google.android.gms.appindexing.Action;
+//import com.bruno.gpmap.map.MapsActivity;
 import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Firebase firebase;
+    private DatabaseReference firebase;
+
+    private FirebaseAuth mAuth;
 
     private EditText emailEditText;
 
@@ -42,26 +50,43 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private Toolbar mToolbar;
 
-    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        @Override
-        public void onAuthenticated(AuthData authData) {
-            showProgress(false);
-            goMapActivity(authData.getUid());
-        }
-
-        @Override
-        public void onAuthenticationError(FirebaseError firebaseError) {
-            showError();
-        }
-    };
+//    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
+//
+//        @Override
+//        public void onAuthenticated(AuthData authData) {
+//            showProgress(false);
+//            goMapActivity(authData.getUid());
+//        }
+//
+//        @Override
+//        public void onAuthenticationError(FirebaseError firebaseError) {
+//            showError();
+//        }
+//    };
     private ImageView rocketImage;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
     private boolean ret = false;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private String TAG = "Login";
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
 
     private void showError(){
         showProgress(false);
@@ -70,7 +95,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void goMapActivity(String uid) {
         finish();
-        MapsActivity.start(this, uid);
+//        MapsActivity.start(this, uid);
     }
 
     @Override
@@ -78,19 +103,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+
         emailEditText = (EditText) findViewById(R.id.email);
         passwordEditText = (EditText) findViewById(R.id.password);
 
-        Firebase.setAndroidContext(this);
-        firebase = new Firebase("https://gpmap.firebaseio.com/");
+        firebase = FirebaseDatabase.getInstance().getReference();
 
         rocketImage = (ImageView) findViewById(R.id.idBotao);
         rocketImage.setBackgroundResource(R.drawable.anim_but);
 
         rocketImage.setOnClickListener(this);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -100,10 +138,25 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    public void login(View view) {
+    public void login() {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
-        firebase.authWithPassword(email, password, authCallback);
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithEmail", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     public void register(View view) {
@@ -134,18 +187,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     checkIfAnimationDone(a);
                 } else{
                     showProgress(true);
-                    tryLogin();
+                    login();
                 }
             }
         }, timeBetweenChecks);
         return ret;
     };
 
-    private void tryLogin(){
-        String email = emailEditText.getText().toString();
-        String password = passwordEditText.getText().toString();
-        firebase.authWithPassword(email, password, authCallback);
-    }
+//    private void tryLogin(){
+//        String email = emailEditText.getText().toString();
+//        String password = passwordEditText.getText().toString();
+//        firebase.authWithPassword(email, password, authCallback);
+//    }
     /**
      * Shows the progress UI and hides the login form.
      */

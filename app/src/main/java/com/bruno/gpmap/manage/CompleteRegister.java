@@ -1,9 +1,7 @@
 package com.bruno.gpmap.manage;
 
-import android.content.Context;
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -11,8 +9,9 @@ import android.widget.Toast;
 
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.model.User;
-import com.firebase.client.Firebase;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,7 +75,8 @@ public class CompleteRegister extends AppCompatActivity {
     }
 
     private void addInfo(){
-        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+//        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
         ref.child(uid).child("hair").setValue(spinnerHair.getSelectedItem().toString());
         ref.child(uid).child("skin").setValue(spinnerSkin.getSelectedItem().toString());
         ref.child(uid).child("description").setValue(desc.getText().toString());
