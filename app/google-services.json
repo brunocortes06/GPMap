@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "84077874623",
+    "firebase_url": "https://gpmap.firebaseio.com",
+    "project_id": "project-3448140967181391691",
+    "storage_bucket": "project-3448140967181391691.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84077874623:android:56bc758f11495a45",
+        "android_client_info": {
+          "package_name": "com.bruno.gmap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "84077874623-96tb90db155j9n8gvv233b5alctoir5j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84077874623:android:a28bc66bcea5befc",
+        "android_client_info": {
+          "package_name": "com.bruno.gpmap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "84077874623-klloktqqm4dj8gvv2p57oooiutj584e1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bruno.gpmap",
+            "certificate_hash": "9D35DF812BA6D87B31B16CA46BE7F95FAEEEFBB0"
+          }
+        },
+        {
+          "client_id": "84077874623-96tb90db155j9n8gvv233b5alctoir5j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCumJfCAytJEeaONjIM3gNEy926jzeeZ90"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
