@@ -185,9 +185,10 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void updateFirebaseLocation(String uid, double latitude, double longitude) {
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-        GeoFire geoFire = new GeoFire(rootRef.child("locations"));
-        GeoLocation geoLocation = new GeoLocation(latitude, longitude);
-        geoFire.setLocation(uid, geoLocation);
+        //FIXME
+//        GeoFire geoFire = new GeoFire(rootRef.child("locations"));
+//        GeoLocation geoLocation = new GeoLocation(latitude, longitude);
+//        geoFire.setLocation(uid, geoLocation);
     }
 
     @Override
