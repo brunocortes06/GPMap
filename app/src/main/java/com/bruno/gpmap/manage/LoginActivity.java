@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.bruno.gpmap.R;
 //import com.bruno.gpmap.map.MapsActivity;
+import com.bruno.gpmap.map.MapsActivity;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -54,7 +55,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 //    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
 //
-//        @Override
+//       @Override
 //        public void onAuthenticated(AuthData authData) {
 //            showProgress(false);
 //            goMapActivity(authData.getUid());
@@ -95,7 +96,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void goMapActivity(String uid) {
         finish();
-//        MapsActivity.start(this, uid);
+        MapsActivity.start(this, uid);
     }
 
     @Override
@@ -111,6 +112,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    goMapActivity(user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
