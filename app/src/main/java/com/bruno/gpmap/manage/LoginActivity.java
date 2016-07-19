@@ -53,7 +53,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private FirebaseAuth auth = FirebaseAuth.getInstance();
 
-//    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
+    //    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
 //
 //       @Override
 //        public void onAuthenticated(AuthData authData) {
@@ -112,7 +112,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    goMapActivity(user.getUid());
+                    //TODO login automatico desativado
+//                    goMapActivity(user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -141,24 +142,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
     public void login() {
-        String email = emailEditText.getText().toString();
-        String password = passwordEditText.getText().toString();
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+        try {
+            String email = emailEditText.getText().toString();
+            String password = passwordEditText.getText().toString();
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            goMapActivity(task.getResult().getUser().getUid());
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "signInWithEmail", task.getException());
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void register(View view) {

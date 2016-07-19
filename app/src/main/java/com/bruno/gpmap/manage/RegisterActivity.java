@@ -87,6 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
         ref.child(uid).child("name").setValue(mFullName.getText().toString());
         ref.child(uid).child("gender").setValue(spGender.getSelectedItem().toString());
         ref.child(uid).child("age").setValue(spAge.getSelectedItem().toString());
+        ref.child(uid).child("uid").setValue(uid);
         updateFirebaseLocation(uid, lat, lng);
         finish();
     }

@@ -6,6 +6,7 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="name">Nome</string>
+    <string name="age">Idade</string>
     <string name="prompt_password">Senha</string>
     <string name="pick_date">Data de nascimento</string>
     <string name="gender">Genero</string>
@@ -25,4 +26,8 @@
     <string name="logout">Logout</string>
     <string name="complete_reg">Completar Cadastro</string>
     <string name="description">Descrição</string>
+    <string name="description_point">Descrição:</string>
+    <string name="hair">Cabelo</string>
+    <string name="skin">Pele</string>
+    <string name="tel">Telefone</string>
 </resources>

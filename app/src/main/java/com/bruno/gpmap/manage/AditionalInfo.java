@@ -15,8 +15,14 @@ import com.google.firebase.database.ValueEventListener;
 
 public class AditionalInfo extends AppCompatActivity {
 
+    private EditText age;
     private EditText desc;
+    private EditText gender;
+    private EditText hair;
+    private EditText skin;
+    private EditText tel;
     private String uid;
+    private String uidSelected;
     private static final String TAG = AditionalInfo.class.getSimpleName();
 
     @Override
@@ -25,29 +31,39 @@ public class AditionalInfo extends AppCompatActivity {
         setContentView(R.layout.activity_additional_info);
 
         uid = getIntent().getExtras().getString("uid");
+        uidSelected = getIntent().getExtras().getString("uidSelected");
 
         desc = (EditText)findViewById(R.id.editTextDescAD);
+        tel = (EditText)findViewById(R.id.editTextTel);
+        age = (EditText)findViewById(R.id.editTextAge);
+        skin = (EditText)findViewById(R.id.editTextSkin);
+        gender = (EditText)findViewById(R.id.editTextGender);
+        hair = (EditText)findViewById(R.id.editTextHair);
 
-        populate(uid);
+        populate();
     }
 
-    private void populate(String uid) {
+    private void populate() {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users");
-        ValueEventListener postListener = new ValueEventListener() {
+        ValueEventListener dataListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
                 User user = dataSnapshot.getValue(User.class);
-                // ...
+                desc.setText(user.getDescription());
+                tel.setText(user.getTel().toString());
+                age.setText(user.getAge());
+                skin.setText(user.getSkin());
+                gender.setText(user.getGender());
+                hair.setText(user.getHair());
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Getting Post failed, log a message
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
-                // ...
             }
         };
-        ref.addValueEventListener(postListener);
+        ref.child(uidSelected).addValueEventListener(dataListener);
     }
 }

@@ -32,6 +32,8 @@ public class CompleteRegister extends AppCompatActivity {
 
     private EditText desc;
 
+    private EditText tel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +42,6 @@ public class CompleteRegister extends AppCompatActivity {
 
         uid = getIntent().getExtras().getString("uid");
         System.out.println(CompleteRegister.class+uid);
-//        otherUsersData = (Map<Marker, User>)getIntent().getSerializableExtra("User");
 
         spinnerHair = (Spinner)findViewById(R.id.spinnerHair);
         spinnerHair.setSelection(posHair);
@@ -49,6 +50,8 @@ public class CompleteRegister extends AppCompatActivity {
         spinnerSkin.setSelection(posSkin);
 
         desc = (EditText)findViewById(R.id.editTextDesc);
+
+        tel = (EditText)findViewById(R.id.editTextTel);
     }
 
     @Override
@@ -63,6 +66,10 @@ public class CompleteRegister extends AppCompatActivity {
             Toast.makeText(this, "Preencha a descrição", Toast.LENGTH_SHORT).show();
             return;
         }
+        if(tel.equals(null) || tel.equals("")) {
+            Toast.makeText(this, "Preencha o telefone", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if(spinnerHair.getSelectedItemPosition() == 0) {
             Toast.makeText(this, "Selecione a cor do cabelo", Toast.LENGTH_SHORT).show();
             return;
@@ -75,19 +82,13 @@ public class CompleteRegister extends AppCompatActivity {
     }
 
     private void addInfo(){
-//        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users");
         ref.child(uid).child("hair").setValue(spinnerHair.getSelectedItem().toString());
         ref.child(uid).child("skin").setValue(spinnerSkin.getSelectedItem().toString());
         ref.child(uid).child("description").setValue(desc.getText().toString());
+        ref.child(uid).child("tel").setValue(tel.getText().toString());
 
         finish();
     }
 
-//    public static void start (Context context, User user)
-//    {
-//        Intent intent = new Intent(context, CompleteRegister.class);
-//        intent.putExtra("User", user);
-//        context.startActivity(intent);
-//    }
 }
