@@ -12,7 +12,7 @@ public class User {
     public String description;
     public String hair;
     public String skin;
-    public long tel;
+    public String tel;
     public String uid;
 
 
@@ -20,7 +20,7 @@ public class User {
 
     }
 
-    public User(String age, String gender, String name, String description, String hair, String skin, Long tel, String uid) {
+    public User(String age, String gender, String name, String description, String hair, String skin, String tel, String uid) {
         this.age = age;
         this.gender = gender;
         this.name = name;
@@ -59,7 +59,7 @@ public class User {
         return uid;
     }
 
-    public Long getTel() {
+    public String getTel() {
         return tel;
     }
 }

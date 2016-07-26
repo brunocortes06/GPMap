@@ -60,24 +60,6 @@ public class RegisterActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
-//    private Firebase.ValueResultHandler<Map<String, Object>> registerCallback
-//            = new Firebase.ValueResultHandler<Map<String, Object>>()
-//    {
-//
-//        @Override
-//        public void onSuccess (Map<String, Object> stringObjectMap)
-//        {
-//            finishRegister(stringObjectMap.get("uid").toString());
-//        }
-//
-//        @Override
-//        public void onError (FirebaseError firebaseError)
-//        {
-//
-//            showError();
-//        }
-//    };
-
     private void showError() {
         Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
     }
@@ -117,6 +99,7 @@ public class RegisterActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    Toast.makeText(RegisterActivity.this, "Usuário já logado", Toast.LENGTH_LONG).show();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -162,21 +145,25 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createUser(String email, String password) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-                        finishRegister(task.getResult().getUser().getUid());
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+        try {
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+                            finishRegister(task.getResult().getUser().getUid());
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(RegisterActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static void start(Context context) {
@@ -187,54 +174,22 @@ public class RegisterActivity extends AppCompatActivity {
     private void updateFirebaseLocation(String uid, double latitude, double longitude) {
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
         //FIXME
-//        GeoFire geoFire = new GeoFire(rootRef.child("locations"));
-//        GeoLocation geoLocation = new GeoLocation(latitude, longitude);
-//        geoFire.setLocation(uid, geoLocation);
+        GeoFire geoFire = new GeoFire(rootRef.child("locations"));
+        GeoLocation geoLocation = new GeoLocation(latitude, longitude);
+        geoFire.setLocation(uid, geoLocation);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
         mAuth.addAuthStateListener(mAuthListener);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Register Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.bruno.gpmap.manage/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Register Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.bruno.gpmap.manage/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.disconnect();
     }
 }
