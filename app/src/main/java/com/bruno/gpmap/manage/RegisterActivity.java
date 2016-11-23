@@ -3,9 +3,12 @@ package com.bruno.gpmap.manage;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -27,6 +30,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.Format;
+import java.util.Locale;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -54,11 +59,8 @@ public class RegisterActivity extends AppCompatActivity {
     private double lng;
 
     private String TAG = "Register";
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
+
+    private EditText telephone;
 
     private void showError() {
         Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
@@ -69,7 +71,7 @@ public class RegisterActivity extends AppCompatActivity {
         ref.child(uid).child("name").setValue(mFullName.getText().toString());
         ref.child(uid).child("gender").setValue(spGender.getSelectedItem().toString());
         ref.child(uid).child("age").setValue(spAge.getSelectedItem().toString());
-        ref.child(uid).child("uid").setValue(uid);
+        ref.child(uid).child("tel").setValue(telephone.getText().toString());
         updateFirebaseLocation(uid, lat, lng);
         finish();
     }
@@ -90,6 +92,12 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText = (EditText) findViewById(R.id.password);
 
         mFullName = (EditText) findViewById(R.id.name);
+
+        telephone = (EditText) findViewById(R.id.tel);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            telephone.addTextChangedListener(new PhoneNumberFormattingTextWatcher("BR"));
+        }
+
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -115,18 +123,20 @@ public class RegisterActivity extends AppCompatActivity {
         spAge = (Spinner) findViewById(R.id.spinnerAge);
         spAge.setSelection(posAge);
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     public void register(View view) {
         String email = emailEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         String name = mFullName.getText().toString();
+        String tel = telephone.getText().toString();
 
         if (name.equals(null) || name.equals("")) {
             Toast.makeText(this, "Preencha o Nome", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (tel.equals(null) || tel.equals("")) {
+            Toast.makeText(this, "Preencha o Telefone", Toast.LENGTH_SHORT).show();
             return;
         }
         if (spGender.getSelectedItemPosition() == 0) {

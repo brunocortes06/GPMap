@@ -21,20 +21,17 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bruno.gpmap.AdditionalInfo;
 import com.bruno.gpmap.R;
-import com.bruno.gpmap.manage.AditionalInfo;
 import com.bruno.gpmap.manage.CompleteRegister;
 import com.bruno.gpmap.manage.LoginActivity;
 import com.bruno.gpmap.model.User;
 import com.bruno.gpmap.util.GPSTracker;
-//import com.firebase.client.DataSnapshot;
-//import com.firebase.client.Firebase;
-//import com.firebase.client.FirebaseError;
-//import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.firebase.geofire.LocationCallback;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapsInitializer;
@@ -46,6 +43,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,7 +59,6 @@ import java.util.Map;
 
     private GoogleMap mMap;
     private LocationManager locationmanager;
-    //private Firebase firebase;
     private DatabaseReference mDatabase;
 
     private String uid;
@@ -70,7 +67,8 @@ import java.util.Map;
     private GeoQuery geoQuery;
     private HashMap<String, Marker> markers;
     private GeoFire geoFire;
-//    private Map<String, User> userData;
+    private Map<String, User> currentUserData;
+    private Map<String, User> allOtherUserData;
     private Map<Marker, User> otherUsersData;
 
     private Toolbar mToolbar;
@@ -106,7 +104,7 @@ import java.util.Map;
 
     private void updateFirebaseLocation (double latitude, double longitude)
     {
-        GeoFire geoFire = new GeoFire(mDatabase.child("locations"));
+        GeoFire geoFire = new GeoFire(mDatabase);
         GeoLocation geoLocation = new GeoLocation(latitude, longitude);
         geoFire.setLocation(uid, geoLocation);
     }
@@ -122,7 +120,8 @@ import java.util.Map;
 
         MapsInitializer.initialize(this);
 
-//        userData = new HashMap<>();
+        currentUserData = new HashMap<>();
+        allOtherUserData = new HashMap<>();
         otherUsersData = new HashMap<>();
 
         GPSTracker gps = new GPSTracker(this);
@@ -140,10 +139,10 @@ import java.util.Map;
         this.geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference().child("locations"));
         // radius in km
 //        GeoLocation geoLocation = new GeoLocation(lat, lng);
-        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(lat, lng), 1);
+        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(lat, lng), 20);
 
         // setup markers
-        this.markers = new HashMap<String, Marker>();
+        this.markers = new HashMap<>();
 
         mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(mToolbar);
@@ -173,9 +172,6 @@ import java.util.Map;
             Intent complete_reg = new Intent(MapsActivity.this, CompleteRegister.class);
             complete_reg.putExtra("uid", uid);
             startActivity(complete_reg);
-//            Intent complete_reg = new Intent(MapsActivity.this, CompleteRegister.class);
-//            complete_reg.putExtra("User", (Serializable)otherUsersData);
-//            startActivity(complete_reg);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -207,9 +203,8 @@ import java.util.Map;
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Intent intent = new Intent(MapsActivity.this, AditionalInfo.class);
-                intent.putExtra("uid",uid);
-                intent.putExtra("uidSelected",otherUsersData.get(marker).getUid());
+                Intent intent = new Intent(MapsActivity.this, AdditionalInfo.class);
+                intent.putExtra("key", marker.getSnippet());
                 startActivity(intent);
             }
         });
@@ -244,18 +239,115 @@ import java.util.Map;
 
     //Metodos do listener  GeoQuery
     @Override
-    public void onKeyEntered(String key, GeoLocation location) {
-        Marker marker;
-        if(key.equals(uid)) {
-//            System.out.println("On Key entered age: "+userData.get(key).getAge());
-//            System.out.println("On Key entered gender: "+userData.get(key).getGender());
-//            System.out.println("On Key entered name: "+userData.get(key).getName());
-            marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-        }else{
-            marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
-        }
-        this.markers.put(key, marker);
-        getUserData(marker, key);
+    public void onKeyEntered(final String key, final GeoLocation location) {
+        DatabaseReference mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("users");
+        mDatabaseUser.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+
+                currentUserData.put(snapshot.getKey(),snapshot.getValue(User.class));
+                // se showBoys for falso, mostrara mulheres
+                boolean showBoys = false;
+                User user = snapshot.getValue(User.class);
+                if(user.getGender().equals("Feminino")){
+                    showBoys = true;
+                }
+                searchAllOtherUsersData(showBoys);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+    }
+
+    private void searchAllOtherUsersData(final boolean showBoys) {
+        DatabaseReference mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("users");
+        mDatabaseUser.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+
+                allOtherUserData.put(dataSnapshot.getKey(),dataSnapshot.getValue(User.class));
+                // se showBoys for falso, mostrara mulheres
+                if(showBoys && dataSnapshot.getValue(User.class).getGender().equals("Masculino")) {
+                    //printo os markers no mapa, apenas o sexo oposto do usuário
+                    printMarkers(dataSnapshot.getKey());
+                }else if(!showBoys && dataSnapshot.getValue(User.class).getGender().equals("Feminino")) {
+                    printMarkers(dataSnapshot.getKey());
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+
+                // A comment has changed, use the key to determine if we are displaying this
+                // comment and if so displayed the changed comment.
+//                Comment newComment = dataSnapshot.getValue(Comment.class);
+//                String commentKey = dataSnapshot.getKey();
+
+                // ...
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+
+                // A comment has changed, use the key to determine if we are displaying this
+                // comment and if so remove it.
+//                String commentKey = dataSnapshot.getKey();
+
+                // ...
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+
+                // A comment has changed position, use the key to determine if we are
+                // displaying this comment and if so move it.
+//                Comment movedComment = dataSnapshot.getValue(Comment.class);
+//                String commentKey = dataSnapshot.getKey();
+
+                // ...
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+//                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
+//                Toast.makeText(mContext, "Failed to load comments.",
+//                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void printMarkers(final String key) {
+
+        geoFire.getLocation(key, new LocationCallback() {
+            @Override
+            public void onLocationResult(String key, GeoLocation location) {
+                if (location != null) {
+                    Marker marker;
+                    if(key.equals(uid)) {
+                        marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                        marker.setSnippet(key);
+                    }else{
+                        marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
+                        marker.setSnippet(key);
+                    }
+                    markers.put(key, marker);
+                    getUserData(marker, key);
+                } else {
+                    System.out.println(String.format("There is no location for key %s in GeoFire", key));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println("There was an error getting the GeoFire location: " + databaseError);
+            }
+        });
     }
 
     @Override
@@ -370,21 +462,6 @@ import java.util.Map;
 
         return infoView;
     }
-
-//    public void getCurrentUserData(String uid) {
-//        Firebase ref = new Firebase("https://gpmap.firebaseio.com/users");
-//        ref.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot snapshot) {
-//                userData.put(snapshot.getKey().toString(), snapshot.getValue(User.class));
-//            }
-//
-//            @Override
-//            public void onCancelled(FirebaseError firebaseError) {
-//                System.out.println("The read failed: " + firebaseError.getMessage());
-//            }
-//        });
-//    }
 
     public void getUserData(final Marker marker, String key) {
         DatabaseReference mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("users");
