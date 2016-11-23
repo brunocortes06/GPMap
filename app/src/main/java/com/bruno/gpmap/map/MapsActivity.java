@@ -21,8 +21,8 @@ import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bruno.gpmap.AdditionalInfo;
 import com.bruno.gpmap.R;
+import com.bruno.gpmap.manage.AditionalInfo;
 import com.bruno.gpmap.manage.CompleteRegister;
 import com.bruno.gpmap.manage.LoginActivity;
 import com.bruno.gpmap.model.User;
@@ -207,7 +207,9 @@ import java.util.Map;
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Intent intent = new Intent(MapsActivity.this, AdditionalInfo.class);
+                Intent intent = new Intent(MapsActivity.this, AditionalInfo.class);
+                intent.putExtra("uid",uid);
+                intent.putExtra("uidSelected",otherUsersData.get(marker).getUid());
                 startActivity(intent);
             }
         });

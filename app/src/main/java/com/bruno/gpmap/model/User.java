@@ -12,19 +12,23 @@ public class User {
     public String description;
     public String hair;
     public String skin;
+    public String tel;
+    public String uid;
 
 
     public User(){
 
     }
 
-    public User(String age, String gender, String name, String description, String hair, String skin) {
+    public User(String age, String gender, String name, String description, String hair, String skin, String tel, String uid) {
         this.age = age;
         this.gender = gender;
         this.name = name;
         this.description = description;
         this.hair = hair;
         this.skin = skin;
+        this.tel = tel;
+        this.uid = uid;
     }
 
     public String getAge() {
@@ -49,5 +53,13 @@ public class User {
 
     public String getHair() {
         return hair;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public String getTel() {
+        return tel;
     }
 }
