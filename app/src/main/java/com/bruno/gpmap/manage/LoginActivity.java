@@ -53,24 +53,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private FirebaseAuth auth = FirebaseAuth.getInstance();
 
-    //    private Firebase.AuthResultHandler authCallback = new Firebase.AuthResultHandler() {
-//
-//       @Override
-//        public void onAuthenticated(AuthData authData) {
-//            showProgress(false);
-//            goMapActivity(authData.getUid());
-//        }
-//
-//        @Override
-//        public void onAuthenticationError(FirebaseError firebaseError) {
-//            showError();
-//        }
-//    };
     private ImageView rocketImage;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
     private boolean ret = false;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String TAG = "Login";
@@ -150,12 +133,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
+                            if(!task.isSuccessful()){
+                                Log.w(TAG, "signInWithEmail", task.getException());
+                                Toast.makeText(LoginActivity.this, "Login inválido, tente novamente!.",
+                                        Toast.LENGTH_LONG).show();
+                                showProgress(false);
+                                return;
+                            }
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             goMapActivity(task.getResult().getUser().getUid());
                             if (!task.isSuccessful()) {
+                                showProgress(false);
                                 Log.w(TAG, "signInWithEmail", task.getException());
                                 Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
@@ -181,6 +171,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         AnimationDrawable rocketAnimation = (AnimationDrawable) rocketImage.getBackground();
         rocketAnimation.start();
 
+        if( emailEditText.getText().toString().equals(null) || emailEditText.getText().toString().equals("")) {
+            Toast.makeText(this, "Digite o e-mail!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if( passwordEditText.getText().toString().equals(null) || passwordEditText.getText().toString().equals("")){
+            Toast.makeText(this, "Digite a senha!", Toast.LENGTH_LONG).show();
+            return;
+            }
 
         checkIfAnimationDone(rocketAnimation);
     }
@@ -202,11 +200,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         return ret;
     };
 
-//    private void tryLogin(){
-//        String email = emailEditText.getText().toString();
-//        String password = passwordEditText.getText().toString();
-//        firebase.authWithPassword(email, password, authCallback);
-//    }
     /**
      * Shows the progress UI and hides the login form.
      */

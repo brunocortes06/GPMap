@@ -169,6 +169,7 @@ import java.util.Map;
         }
         if (item.getItemId() == R.id.complete_reg)
         {
+            finish();
             Intent complete_reg = new Intent(MapsActivity.this, CompleteRegister.class);
             complete_reg.putExtra("uid", uid);
             startActivity(complete_reg);

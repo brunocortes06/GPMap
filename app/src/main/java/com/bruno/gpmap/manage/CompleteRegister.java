@@ -8,6 +8,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
+import com.bruno.gpmap.map.MapsActivity;
 import com.bruno.gpmap.model.User;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.database.DatabaseReference;
@@ -88,6 +89,12 @@ public class CompleteRegister extends AppCompatActivity {
         ref.child(uid).child("tel").setValue(tel.getText().toString());
 
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+        MapsActivity.start(this, uid);
     }
 
 }
