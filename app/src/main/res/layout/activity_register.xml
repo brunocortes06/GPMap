@@ -12,61 +12,114 @@
     android:background="@drawable/border"
     tools:context=".manage.RegisterActivity">
 
-  <EditText
-      android:id="@+id/email"
-      android:layout_height="wrap_content"
+  <ScrollView
       android:layout_width="match_parent"
-      android:hint="@string/prompt_email"/>
+      android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-  <Space
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal" />
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="69dp">
 
-  <EditText
-      android:id="@+id/password"
-      android:layout_height="wrap_content"
-      android:layout_width="match_parent"
-      android:hint="@string/prompt_password"
-      android:inputType="textPassword"/>
-  <Space
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal" />
+        <EditText
+            android:id="@+id/email"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:hint="@string/prompt_email"/>
+      </LinearLayout>
 
-  <EditText
-      android:id="@+id/name"
-      android:layout_height="wrap_content"
-      android:layout_width="match_parent"
-      android:hint="@string/name"
-      android:inputType="textPersonName"/>
-  <Space
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal" />
+      <Space
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal" />
 
-  <Spinner
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:id="@+id/spinnerGender"
-      android:entries="@array/gender"
-      android:layout_gravity="center_horizontal"
-      android:spinnerMode="dropdown" />
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="69dp">
+        <EditText
+            android:id="@+id/password"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:hint="@string/prompt_password"
+            android:inputType="textPassword"/>
+      </LinearLayout>
 
-  <Spinner
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:id="@+id/spinnerAge"
-      android:entries="@array/age" />
+      <Space
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal" />
 
-  <Space
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal" />
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="69dp">
+        <EditText
+            android:id="@+id/name"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:hint="@string/name"
+            android:inputType="textPersonName"/>
+      </LinearLayout>
 
-  <Button
-      android:layout_height="wrap_content"
-      android:layout_width="match_parent"
-      android:onClick="register"
-      android:text="@string/register"/>
+      <Space
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal" />
+
+
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="69dp">
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinnerGender"
+            android:entries="@array/gender"
+            android:layout_gravity="center_horizontal"
+            android:spinnerMode="dropdown" />
+      </LinearLayout>
+
+
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="69dp">
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinnerAge"
+            android:entries="@array/age"
+            android:layout_gravity="center_horizontal" />
+      </LinearLayout>
+
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="69dp">
+
+        <EditText
+            android:id="@+id/tel"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:hint="@string/telephone"/>
+      </LinearLayout>
+
+      <Space
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal" />
+
+      <Button
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:onClick="register"
+          android:text="@string/register"/>
+    </LinearLayout>
+  </ScrollView>
 </LinearLayout>
