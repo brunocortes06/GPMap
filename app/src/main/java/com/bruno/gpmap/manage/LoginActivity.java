@@ -5,6 +5,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,17 +27,41 @@ import android.widget.Toast;
 import com.bruno.gpmap.R;
 //import com.bruno.gpmap.map.MapsActivity;
 import com.bruno.gpmap.map.MapsActivity;
+import com.bruno.gpmap.util.GPSTracker;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -57,6 +85,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private boolean ret = false;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String TAG = "Login";
+    private CallbackManager mCallbackManager;
+    private String age;
+    private String email;
+    private String name;
+    private String gender;
+    private boolean loginFace = false;
 
     @Override
     public void onStart() {
@@ -85,18 +119,42 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        FirebaseAuth.getInstance().signOut();
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        FacebookSdk.setApplicationId(getResources().getString(R.string.facebook_app_id));
         setContentView(R.layout.activity_login);
-
         mAuth = FirebaseAuth.getInstance();
+
+
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.bruno.gpmap",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        } catch (NoSuchAlgorithmException e) {
+
+        }
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
+
+                    if(loginFace)
+                        registerUserData(user.getUid());
+
+                    setLocation(user.getUid());
+
                     // User is signed in
-                    //TODO login automatico desativado
-//                    goMapActivity(user.getUid());
+                    //login automatico
+                    goMapActivity(user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -105,6 +163,72 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 // ...
             }
         };
+
+        AccessToken.getCurrentAccessToken();
+
+        // Initialize Facebook Login button
+        mCallbackManager = CallbackManager.Factory.create();
+        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setReadPermissions("email", "public_profile", "user_birthday");
+        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(JSONObject object, GraphResponse response) {
+                                Log.v("LoginActivity", response.toString());
+                                // Application code
+                                try {
+                                    String birthday = object.getString("birthday"); // 01/31/1980 format
+
+                                    DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+                                    Date date = (Date)formatter.parse(birthday);
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(date);
+                                    Calendar today = Calendar.getInstance();
+                                    int ageInt = today.get(Calendar.YEAR) - cal.get((Calendar.YEAR));
+                                    age = String.valueOf(ageInt);
+                                    email = object.getString("email");
+                                    name = object.getString("first_name");
+                                    gender = object.getString("gender");
+                                    if(gender.equals("male"))
+                                        gender = "Masculino";
+
+                                    if(gender.equals("female"))
+                                        gender = "Feminino";
+
+                                    loginFace = true;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id,first_name,email,gender,birthday");
+                request.setParameters(parameters);
+                request.executeAsync();
+
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "facebook:onCancel");
+                // ...
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "facebook:onError", error);
+                // ...
+            }
+        });
 
         emailEditText = (EditText) findViewById(R.id.email);
         passwordEditText = (EditText) findViewById(R.id.password);
@@ -121,6 +245,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(mToolbar);
+    }
+
+    private void setLocation(String uid) {
+        GeoFire geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference().child("locations"));
+        GPSTracker gps = new GPSTracker(this);
+        // check if GPS enabled
+        double lat = 0;
+        double lng = 0;
+        if (gps.canGetLocation()) {
+            lat = gps.getLatitude();
+            lng = gps.getLongitude();
+        }
+        GeoLocation geoLocation = new GeoLocation(lat, lng);
+        geoFire.setLocation(uid, geoLocation);
+    }
+
+    private void registerUserData(String uid) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://gpmap.firebaseio.com/users");
+        ref.child(uid).child("name").setValue(name);
+        ref.child(uid).child("gender").setValue(gender);
+        ref.child(uid).child("age").setValue(age);
+        ref.child(uid).child("tel").setValue("xx xxxxx-xxxx");
     }
 
 
@@ -178,7 +324,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if( passwordEditText.getText().toString().equals(null) || passwordEditText.getText().toString().equals("")){
             Toast.makeText(this, "Digite a senha!", Toast.LENGTH_LONG).show();
             return;
-            }
+        }
 
         checkIfAnimationDone(rocketAnimation);
     }
@@ -252,5 +398,37 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             startActivity(complete_reg);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void handleFacebookAccessToken(AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken:" + token);
+
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+//                        goMapActivity((credential.getProvider()));
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Pass the activity result back to the Facebook SDK
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

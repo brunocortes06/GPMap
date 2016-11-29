@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,9 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.firebase.geofire.LocationCallback;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapsInitializer;
@@ -70,6 +74,7 @@ import java.util.Map;
     private Map<String, User> currentUserData;
     private Map<String, User> allOtherUserData;
     private Map<Marker, User> otherUsersData;
+    private AdView adView;
 
     private Toolbar mToolbar;
 
@@ -114,11 +119,14 @@ import java.util.Map;
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         MapsInitializer.initialize(this);
+        getAds();
+
 
         currentUserData = new HashMap<>();
         allOtherUserData = new HashMap<>();
@@ -139,15 +147,13 @@ import java.util.Map;
         this.geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference().child("locations"));
         // radius in km
 //        GeoLocation geoLocation = new GeoLocation(lat, lng);
-        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(lat, lng), 20);
+        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(lat, lng), 100);
 
         // setup markers
         this.markers = new HashMap<>();
 
         mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setSupportActionBar(mToolbar);
-
-//        getCurrentUserData(uid);
 
     }
 
@@ -246,10 +252,17 @@ import java.util.Map;
             @Override
             public void onDataChange(DataSnapshot snapshot) {
 
-                currentUserData.put(snapshot.getKey(),snapshot.getValue(User.class));
+                try {
+                    currentUserData.put(snapshot.getKey(),snapshot.getValue(User.class));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 // se showBoys for falso, mostrara mulheres
                 boolean showBoys = false;
                 User user = snapshot.getValue(User.class);
+                if(user == null)
+                    return;
+
                 if(user.getGender().equals("Feminino")){
                     showBoys = true;
                 }
@@ -477,5 +490,37 @@ import java.util.Map;
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
+    }
+
+    private void getAds() {
+//        adView = new AdView(this);
+        adView = (AdView) findViewById(R.id.adView);
+//        adView.setAdUnitId("ca-app-pub-9461541042807906/9717414805");
+//        adView.setAdSize(AdSize.SMART_BANNER);
+
+        AdRequest adRequest = new AdRequest.Builder()
+//                  .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+//        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+    }
+
+//    private void showAds() {
+//        LinearLayout linear2 = new LinearLayout(Votations.this);
+//        linear2.setOrientation(LinearLayout.VERTICAL);
+//        linear2.addView(adView);
+//        linearlayout.addView(linear2);
+//    }
+
+    @Override
+    protected void onPause() {
+        adView.pause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adView.resume();
     }
 }

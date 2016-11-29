@@ -31,4 +31,10 @@
     <string name="hair">Cabelo</string>
     <string name="skin">Pele</string>
     <string name="tel">Telefone</string>
+
+    <!--facebook-->
+    <string name="facebook_app_id">245483092537991</string>
+
+    <!--ads-->
+    <string name="banner_ad_unit_id">ca-app-pub-9461541042807906/9717414805</string>
 </resources>

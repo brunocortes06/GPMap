@@ -9,81 +9,108 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".manage.CompleteRegister"
+    android:background="@drawable/border"
     android:weightSum="1">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="81dp"
-        android:layout_weight="0.05">
-        <Spinner
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinnerHair"
-            android:entries="@array/hair"
-            android:layout_gravity="center_horizontal" />
-    </LinearLayout>
+            android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.08">
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinnerSkin"
-            android:entries="@array/skin"
-            android:layout_gravity="center_horizontal" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="81dp"
+                android:layout_weight="0.05">
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/spinnerHair"
+                    android:entries="@array/hair"
+                    android:layout_gravity="center_horizontal" />
+            </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/description"
-        android:textSize="20dp"
-        android:textColor="#000000" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="69dp"
+                android:layout_weight="0.05">
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/spinnerSkin"
+                    android:entries="@array/skin"
+                    android:layout_gravity="center_horizontal" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="121dp"
-        android:layout_weight="0.09">
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="96dp"
-            android:inputType="textMultiLine"
-            android:ems="10"
-            android:id="@+id/editTextDesc"
-            android:layout_gravity="center_horizontal" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/description"
+                android:textSize="20dp"
+                android:textColor="#000000" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/tel"
-        android:textSize="20dp"
-        android:textColor="#000000" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="69dp"
+                android:layout_weight="0.09">
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="96dp"
+                    android:inputType="textMultiLine"
+                    android:ems="10"
+                    android:id="@+id/editTextDesc"
+                    android:layout_gravity="center_horizontal" />
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="121dp"
-        android:layout_weight="0.09">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tel"
+                android:textSize="20dp"
+                android:textColor="#000000" />
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="phone"
-            android:ems="10"
-            android:id="@+id/editTextTel"
-            android:layout_weight="1" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="69dp"
+                android:layout_weight="0.09">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:onClick="send"
-            android:text="Enviar"/>
-    </LinearLayout>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:ems="10"
+                    android:id="@+id/editTextTel"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="69dp"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/sendbt"
+
+                    android:text="Enviar"
+                    android:textColor="#c5292a"
+                    android:textSize="30sp"
+
+                    android:layout_width="270dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/buttonshape"
+                    android:shadowColor="#9FA89E"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="5"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="send"
+                    android:textAlignment="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
