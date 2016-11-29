@@ -28,6 +28,7 @@ import com.bruno.gpmap.manage.CompleteRegister;
 import com.bruno.gpmap.manage.LoginActivity;
 import com.bruno.gpmap.model.User;
 import com.bruno.gpmap.util.GPSTracker;
+import com.facebook.login.LoginManager;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -186,6 +187,7 @@ import java.util.Map;
     private void logout ()
     {
         FirebaseAuth.getInstance().signOut();
+        LoginManager.getInstance().logOut();
         finish();
         LoginActivity.start(this);
     }

@@ -5,9 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,7 +12,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
-//import com.bruno.gpmap.map.MapsActivity;
 import com.bruno.gpmap.map.MapsActivity;
 import com.bruno.gpmap.util.GPSTracker;
 import com.facebook.AccessToken;
@@ -39,24 +34,19 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,7 +55,6 @@ import java.util.Date;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private DatabaseReference firebase;
 
     private FirebaseAuth mAuth;
 
@@ -77,17 +66,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private View mProgressView;
 
-    private Toolbar mToolbar;
-
-    private FirebaseAuth auth = FirebaseAuth.getInstance();
-
     private ImageView rocketImage;
-    private boolean ret = false;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String TAG = "Login";
     private CallbackManager mCallbackManager;
     private String age;
-    private String email;
     private String name;
     private String gender;
     private boolean loginFace = false;
@@ -106,11 +89,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void showError(){
-        showProgress(false);
-        Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-    }
-
     private void goMapActivity(String uid) {
         finish();
         MapsActivity.start(this, uid);
@@ -119,27 +97,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        FirebaseAuth.getInstance().signOut();
         FacebookSdk.sdkInitialize(getApplicationContext());
         FacebookSdk.setApplicationId(getResources().getString(R.string.facebook_app_id));
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
-
-
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.bruno.gpmap",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-
-        } catch (NoSuchAlgorithmException e) {
-
-        }
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -152,6 +113,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     setLocation(user.getUid());
 
+                    showProgress(false);
                     // User is signed in
                     //login automatico
                     goMapActivity(user.getUid());
@@ -182,6 +144,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             public void onCompleted(JSONObject object, GraphResponse response) {
                                 Log.v("LoginActivity", response.toString());
                                 // Application code
+                                showProgress(true);
                                 try {
                                     String birthday = object.getString("birthday"); // 01/31/1980 format
 
@@ -192,7 +155,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                     Calendar today = Calendar.getInstance();
                                     int ageInt = today.get(Calendar.YEAR) - cal.get((Calendar.YEAR));
                                     age = String.valueOf(ageInt);
-                                    email = object.getString("email");
+//                                    email = object.getString("email");
                                     name = object.getString("first_name");
                                     gender = object.getString("gender");
                                     if(gender.equals("male"))
@@ -202,9 +165,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                         gender = "Feminino";
 
                                     loginFace = true;
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                } catch (ParseException e) {
+                                } catch (JSONException | ParseException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -233,8 +194,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         emailEditText = (EditText) findViewById(R.id.email);
         passwordEditText = (EditText) findViewById(R.id.password);
 
-        firebase = FirebaseDatabase.getInstance().getReference();
-
         rocketImage = (ImageView) findViewById(R.id.idBotao);
         rocketImage.setBackgroundResource(R.drawable.anim_but);
 
@@ -243,7 +202,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        mToolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
     }
 
@@ -317,11 +276,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         AnimationDrawable rocketAnimation = (AnimationDrawable) rocketImage.getBackground();
         rocketAnimation.start();
 
-        if( emailEditText.getText().toString().equals(null) || emailEditText.getText().toString().equals("")) {
+        if( emailEditText.getText() == null || emailEditText.getText().toString().equals("")) {
             Toast.makeText(this, "Digite o e-mail!", Toast.LENGTH_LONG).show();
             return;
         }
-        if( passwordEditText.getText().toString().equals(null) || passwordEditText.getText().toString().equals("")){
+        if( passwordEditText.getText() == null || passwordEditText.getText().toString().equals("")){
             Toast.makeText(this, "Digite a senha!", Toast.LENGTH_LONG).show();
             return;
         }
@@ -343,7 +302,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         }, timeBetweenChecks);
-        return ret;
+        return false;
     };
 
     /**
@@ -432,3 +391,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }
+
+
+//        try {
+//            PackageInfo info = getPackageManager().getPackageInfo(
+//                    "com.bruno.gpmap",
+//                    PackageManager.GET_SIGNATURES);
+//            for (Signature signature : info.signatures) {
+//                MessageDigest md = MessageDigest.getInstance("SHA");
+//                md.update(signature.toByteArray());
+//                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+//            }
+//        } catch (PackageManager.NameNotFoundException e) {
+//
+//        } catch (NoSuchAlgorithmException e) {
+//
+//        }
