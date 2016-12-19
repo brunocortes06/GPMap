@@ -4,27 +4,33 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bruno.gpmap.AdditionalInfo;
 import com.bruno.gpmap.R;
 import com.bruno.gpmap.manage.CompleteRegister;
+import com.bruno.gpmap.manage.LoadPhoto;
 import com.bruno.gpmap.manage.LoginActivity;
 import com.bruno.gpmap.model.User;
 import com.bruno.gpmap.util.GPSTracker;
@@ -47,6 +53,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -54,6 +62,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -181,6 +192,13 @@ import java.util.Map;
             complete_reg.putExtra("uid", uid);
             startActivity(complete_reg);
         }
+        if (item.getItemId() == R.id.load_photo)
+        {
+            finish();
+            Intent load_photo = new Intent(MapsActivity.this, LoadPhoto.class);
+            load_photo.putExtra("uid", uid);
+            startActivity(load_photo);
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -201,11 +219,11 @@ import java.util.Map;
         locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, locationCallback);
         LatLng latlng = new LatLng(lat, lng);
         mMap.clear();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 15));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local,15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local,12));
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local, 15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(local, 12));
 
         mMap.setInfoWindowAdapter(this);
 
@@ -286,24 +304,29 @@ import java.util.Map;
 
                 allOtherUserData.put(dataSnapshot.getKey(),dataSnapshot.getValue(User.class));
                 // se showBoys for falso, mostrara mulheres
+                if(dataSnapshot.getValue(User.class).getGender() != null) {
+                    if (showBoys && dataSnapshot.getValue(User.class).getGender().equals("Masculino")) {
+                        //printo os markers no mapa, apenas o sexo oposto do usuário
+                        printMarkers(dataSnapshot.getKey());
+                    } else if (!showBoys && dataSnapshot.getValue(User.class).getGender().equals("Feminino")) {
+                        printMarkers(dataSnapshot.getKey());
+                    }
+                }else{
+                    return;
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+
+                allOtherUserData.put(dataSnapshot.getKey(),dataSnapshot.getValue(User.class));
+                // se showBoys for falso, mostrara mulheres
                 if(showBoys && dataSnapshot.getValue(User.class).getGender().equals("Masculino")) {
                     //printo os markers no mapa, apenas o sexo oposto do usuário
                     printMarkers(dataSnapshot.getKey());
                 }else if(!showBoys && dataSnapshot.getValue(User.class).getGender().equals("Feminino")) {
                     printMarkers(dataSnapshot.getKey());
                 }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-
-                // A comment has changed, use the key to determine if we are displaying this
-                // comment and if so displayed the changed comment.
-//                Comment newComment = dataSnapshot.getValue(Comment.class);
-//                String commentKey = dataSnapshot.getKey();
-
-                // ...
             }
 
             @Override
@@ -337,6 +360,66 @@ import java.util.Map;
             }
         });
     }
+//
+//    private void searchAllOtherUsersData(final boolean showBoys) {
+//        DatabaseReference mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("users");
+//            mDatabaseUser.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+//
+//                allOtherUserData.put(dataSnapshot.getKey(),dataSnapshot.getValue(User.class));
+//                // se showBoys for falso, mostrara mulheres
+//                if(showBoys && dataSnapshot.getValue(User.class).getGender().equals("Masculino")) {
+//                    //printo os markers no mapa, apenas o sexo oposto do usuário
+//                    printMarkers(dataSnapshot.getKey());
+//                }else if(!showBoys && dataSnapshot.getValue(User.class).getGender().equals("Feminino")) {
+//                    printMarkers(dataSnapshot.getKey());
+//                }
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+////                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+//
+//                // A comment has changed, use the key to determine if we are displaying this
+//                // comment and if so displayed the changed comment.
+////                Comment newComment = dataSnapshot.getValue(Comment.class);
+////                String commentKey = dataSnapshot.getKey();
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+////                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+//
+//                // A comment has changed, use the key to determine if we are displaying this
+//                // comment and if so remove it.
+////                String commentKey = dataSnapshot.getKey();
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+////                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+//
+//                // A comment has changed position, use the key to determine if we are
+//                // displaying this comment and if so move it.
+////                Comment movedComment = dataSnapshot.getValue(Comment.class);
+////                String commentKey = dataSnapshot.getKey();
+//
+//                // ...
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+////                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
+////                Toast.makeText(mContext, "Failed to load comments.",
+////                        Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
 
     private void printMarkers(final String key) {
 
@@ -457,27 +540,53 @@ import java.util.Map;
         //prepare InfoView programmatically
         LinearLayout infoView = new LinearLayout(MapsActivity.this);
         LinearLayout.LayoutParams infoViewParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        infoView.setOrientation(LinearLayout.HORIZONTAL);
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         infoView.setLayoutParams(infoViewParams);
+        infoView.setOrientation(LinearLayout.VERTICAL);
+
+//        final ImageView img = new ImageView(MapsActivity.this);
+//        img.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+////        img.getLayoutParams().width = 400;
+////        img.getLayoutParams().height = 0;
+//        try {
+//            FirebaseDatabase.getInstance().getReference().child("users").child("cQxn4SyYT1PLr9jvdrXQU9DJhtp1").child("photo").addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot snapshot) {
+//
+//                    if(snapshot.getValue() != null) {
+//                        Picasso.with(MapsActivity.this).load(Uri.parse(snapshot.getValue().toString())).into(img);
+////                        Picasso.with(MapsActivity.this).load(Uri.parse(snapshot.getValue().toString())).fit().centerCrop().into(img);
+//                    }else{
+//                        Picasso.with(MapsActivity.this).load(Uri.parse("https://firebasestorage.googleapis.com/v0/b/project-3448140967181391691.appspot.com/o/photos%2Fno-user-image.gif?alt=media&token=85dadcce-02e4-4af2-9bc6-e3680c601eac")).into(img);
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError firebaseError) {
+//                    System.out.println("The read failed: " + firebaseError.getMessage());
+//                }
+//            });
+//
+//            infoView.addView(img);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+
+
 
         TextView textView = new TextView(MapsActivity.this);
         Drawable backGround = getResources().getDrawable(R.drawable.background_popup);
         textView.setBackgroundDrawable(backGround);
         textView.setText(otherUsersData.get(marker).getName());
         textView.setTextSize(20);
-        textView.setTextColor(Color.RED);
+        textView.setTextColor(Color.BLUE);
+        textView.setPaintFlags(textView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
         infoView.addView(textView);
 
-        LinearLayout subInfoView = new LinearLayout(MapsActivity.this);
-        LinearLayout.LayoutParams subInfoViewParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        subInfoView.setOrientation(LinearLayout.VERTICAL);
-        subInfoView.setLayoutParams(subInfoViewParams);
-
         return infoView;
     }
+
 
     public void getUserData(final Marker marker, String key) {
         DatabaseReference mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("users");
@@ -507,12 +616,6 @@ import java.util.Map;
         adView.loadAd(adRequest);
     }
 
-//    private void showAds() {
-//        LinearLayout linear2 = new LinearLayout(Votations.this);
-//        linear2.setOrientation(LinearLayout.VERTICAL);
-//        linear2.addView(adView);
-//        linearlayout.addView(linear2);
-//    }
 
     @Override
     protected void onPause() {

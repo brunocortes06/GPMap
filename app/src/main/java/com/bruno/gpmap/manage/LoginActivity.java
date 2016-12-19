@@ -5,6 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.graphics.Canvas;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +16,8 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,6 +53,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -101,6 +109,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         FacebookSdk.setApplicationId(getResources().getString(R.string.facebook_app_id));
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
+
+//                try {
+//            PackageInfo info = getPackageManager().getPackageInfo(
+//                    "com.bruno.gpmap",
+//                    PackageManager.GET_SIGNATURES);
+//            for (Signature signature : info.signatures) {
+//                MessageDigest md = MessageDigest.getInstance("SHA");
+//                md.update(signature.toByteArray());
+//                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+//            }
+//        } catch (PackageManager.NameNotFoundException e) {
+//
+//        } catch (NoSuchAlgorithmException e) {
+//
+//        }
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -225,7 +248,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         ref.child(uid).child("name").setValue(name);
         ref.child(uid).child("gender").setValue(gender);
         ref.child(uid).child("age").setValue(age);
-        ref.child(uid).child("tel").setValue("xx xxxxx-xxxx");
+
+        String mPhoneNumber = "";
+        TelephonyManager tMgr = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        mPhoneNumber = tMgr.getLine1Number();
+        if(mPhoneNumber == null || mPhoneNumber.equals("")) {
+            ref.child(uid).child("tel").setValue("xx xxxxx-xxxx");
+        }else{
+            ref.child(uid).child("tel").setValue(mPhoneNumber);
+        }
+
     }
 
 
@@ -357,6 +389,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             startActivity(complete_reg);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void register(){
+        Intent complete_reg = new Intent(LoginActivity.this, RegisterActivity.class);
+        startActivity(complete_reg);
     }
 
     private void handleFacebookAccessToken(AccessToken token) {

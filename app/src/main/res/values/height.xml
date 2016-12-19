@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="height">
-        <item>Altura</item>
+        <item>@string/height</item>
         <item>100cm</item>
         <item>101cm</item>
         <item>102cm</item>

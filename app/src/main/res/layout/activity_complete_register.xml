@@ -18,7 +18,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -48,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/description"
-                android:textSize="20dp"
+                android:textSize="20sp"
                 android:textColor="#000000" />
 
             <LinearLayout
@@ -68,16 +68,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/tel"
-                android:textSize="20dp"
+                android:textSize="20sp"
                 android:textColor="#000000" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="69dp"
-                android:layout_weight="0.09">
+                android:layout_height="69dp">
 
                 <EditText
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:inputType="phone"
                     android:ems="10"
@@ -92,11 +91,9 @@
 
                 <Button
                     android:id="@+id/sendbt"
-
-                    android:text="Enviar"
+                    android:text="@string/send"
                     android:textColor="#c5292a"
                     android:textSize="30sp"
-
                     android:layout_width="270dp"
                     android:layout_height="60dp"
                     android:background="@drawable/buttonshape"

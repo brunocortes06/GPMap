@@ -1,5 +1,6 @@
 package com.bruno.gpmap.manage;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -13,7 +14,10 @@ import com.bruno.gpmap.model.User;
 import com.google.android.gms.maps.model.Marker;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +43,9 @@ public class CompleteRegister extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complete_register);
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
         otherUsersData = new HashMap<>();
 
         uid = getIntent().getExtras().getString("uid");
@@ -53,6 +60,7 @@ public class CompleteRegister extends AppCompatActivity {
         desc = (EditText)findViewById(R.id.editTextDesc);
 
         tel = (EditText)findViewById(R.id.editTextTel);
+
     }
 
     @Override

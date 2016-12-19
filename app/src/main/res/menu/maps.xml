@@ -4,6 +4,9 @@
       android:id="@+id/complete_reg"
       android:title="@string/complete_reg"/>
   <item
+      android:id="@+id/load_photo"
+      android:title="@string/load_photo"/>
+  <item
       android:id="@+id/logout_option"
       android:title="@string/logout"/>
 </menu>

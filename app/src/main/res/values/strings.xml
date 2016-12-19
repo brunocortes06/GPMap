@@ -6,11 +6,16 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="name">Nome</string>
+    <string name="email">E-mail</string>
     <string name="age">Idade</string>
+    <string name="height">Altura</string>
     <string name="prompt_password">Senha</string>
     <string name="pick_date">Data de nascimento</string>
     <string name="gender">Genero</string>
+    <string name="male">Masculino</string>
+    <string name="female">Feminino</string>
     <string name="action_sign_in">Entrar</string>
+    <string name="send">Enviar</string>
     <string name="register">Cadastrar</string>
     <string name="telephone">Telefone</string>
     <string name="error_invalid_email">E-mail inválido</string>
@@ -24,17 +29,24 @@
     <!-- Strings related to general -->
     <string name="select_gender">Selecione o Genero</string>
     <string name="select_height">Selecione a Altura</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Sair</string>
     <string name="complete_reg">Completar Cadastro</string>
     <string name="description">Descrição</string>
     <string name="description_point">Descrição:</string>
     <string name="hair">Cabelo</string>
+    <string name="black">Preto</string>
+    <string name="blonde">Loiro</string>
+    <string name="red">Ruivo</string>
     <string name="skin">Pele</string>
     <string name="tel">Telefone</string>
+    <string name="select_photo">Selecione uma foto</string>
+    <string name="load_photo">Carregar foto</string>
+    <string name="login_ex_text">Caso seja seu primeiro acesso, cadastre-se usando o menu ou então acesse diretamente através do Facebook, nada será publicado em seu nome</string>
 
     <!--facebook-->
-    <string name="facebook_app_id">245483092537991</string>
+    <string name="facebook_app_id" translatable="false">245483092537991</string>
 
     <!--ads-->
-    <string name="banner_ad_unit_id">ca-app-pub-9461541042807906/9717414805</string>
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-9461541042807906/9717414805</string>
+    <string name="title_activity_load_photo">Carregar foto</string>
 </resources>

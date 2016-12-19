@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="hair">
-        <item>Cabelo</item>
-        <item>Preto</item>
-        <item>Loiro</item>
-        <item>Ruivo</item>
+        <item>@string/hair</item>
+        <item>@string/black</item>
+        <item>@string/blonde</item>
+        <item>@string/red</item>
     </string-array>
 </resources>

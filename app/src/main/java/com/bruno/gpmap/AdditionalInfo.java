@@ -1,9 +1,11 @@
 package com.bruno.gpmap;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +17,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by Bruno on 16/05/2016.
@@ -30,6 +35,7 @@ public class AdditionalInfo extends AppCompatActivity {
     private TextView mSkin;
     private TextView mtel;
     private TextView mDesc;
+    private ImageView img;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,7 @@ public class AdditionalInfo extends AppCompatActivity {
         mSkin = (TextView) findViewById(R.id.textSkin);
         mtel = (TextView) findViewById(R.id.textTel);
         mDesc = (TextView) findViewById(R.id.textDesc);
+        img = (ImageView) findViewById(R.id.imageView);
     }
 
 
@@ -52,7 +59,7 @@ public class AdditionalInfo extends AppCompatActivity {
         super.onStart();
     }
 
-    public void getUserData(String key) {
+    public void getUserData(final String key) {
         DatabaseReference mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("users");
         mDatabaseUser.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -93,6 +100,31 @@ public class AdditionalInfo extends AppCompatActivity {
                 }else{
                     mtel.setText("Telefone: -");
                 }
+
+                try {
+                    FirebaseDatabase.getInstance().getReference().child("users").child(key).child("photo").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+
+                            if(snapshot.getValue() != null) {
+                                Picasso.with(AdditionalInfo.this).load(Uri.parse(snapshot.getValue().toString())).into(img);
+                            }else{
+                                Picasso.with(AdditionalInfo.this).load(Uri.parse("https://firebasestorage.googleapis.com/v0/b/project-3448140967181391691.appspot.com/o/photos%2Fno-user-image.gif?alt=media&token=85dadcce-02e4-4af2-9bc6-e3680c601eac")).into(img);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError firebaseError) {
+                            System.out.println("The read failed: " + firebaseError.getMessage());
+                        }
+                    });
+
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+
             }
 
             @Override

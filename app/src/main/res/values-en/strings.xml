@@ -1,2 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">GPMap</string>
+    <string name="action_sign_in">Sign-in</string>
+    <string name="age">Age</string>
+    <string name="complete_reg">Complete Register</string>
+    <string name="description">Description</string>
+    <string name="description_point">Description:</string>
+    <string name="email">E-mail</string>
+    <string name="error_field_required">" Required field"</string>
+    <string name="error_incorrect_password">Invalid Password</string>
+    <string name="error_invalid_email">Invalid E-mail</string>
+    <string name="error_invalid_password">Password too short</string>
+    <string name="gender">Gender</string>
+    <string name="hair">Hair</string>
+    <string name="login_ex_text">In case this is your first access, register using the menu or sign-in with Facebook, nothing will be published in your name</string>
+    <string name="logout">Logout</string>
+    <string name="name">Name</string>
+    <string name="permission_rationale">Release access to contacts</string>
+    <string name="pick_date">Birthday date</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="register">Register</string>
+    <string name="select_gender">Select gender</string>
+    <string name="select_height">Select Height</string>
+    <string name="send">Send</string>
+    <string name="skin">Skin</string>
+    <string name="tel">Telephone</string>
+    <string name="telephone">Telephone</string>
+    <string name="title_activity_login">GPMap</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_register">Register</string>
+    <string name="title_activity_register_success">Successful registration!</string>
+    <string name="height">Height</string>
+    <string name="female">Female</string>
+    <string name="male">Male</string>
+    <string name="blonde">Blonde</string>
+    <string name="red">Red</string>
+    <string name="black">Black</string>
+    <string name="load_photo">Load photo</string>
+    <string name="title_activity_load_photo">Load photo</string>
+    <string name="select_photo">Select a photo</string>
+</resources>

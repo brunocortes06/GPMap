@@ -2,13 +2,12 @@ package com.bruno.gpmap.manage;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.PhoneNumberFormattingTextWatcher;
-import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -16,12 +15,10 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bruno.gpmap.R;
+import com.bruno.gpmap.map.MapsActivity;
 import com.bruno.gpmap.util.GPSTracker;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -30,9 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.text.Format;
-import java.util.Locale;
-import java.util.Map;
+import static android.view.View.INVISIBLE;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -61,18 +56,23 @@ public class RegisterActivity extends AppCompatActivity {
     private String TAG = "Register";
 
     private EditText telephone;
-
-    private void showError() {
-        Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-    }
+    private String mPhoneNumber = "";
 
     private void finishRegister(String uid) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://gpmap.firebaseio.com/users");
         ref.child(uid).child("name").setValue(mFullName.getText().toString());
         ref.child(uid).child("gender").setValue(spGender.getSelectedItem().toString());
         ref.child(uid).child("age").setValue(spAge.getSelectedItem().toString());
-        ref.child(uid).child("tel").setValue(telephone.getText().toString());
+        if(mPhoneNumber.equals("")){
+            ref.child(uid).child("tel").setValue(telephone.getText().toString());
+        }else{
+            ref.child(uid).child("tel").setValue(mPhoneNumber);
+        }
         updateFirebaseLocation(uid, lat, lng);
+
+        Intent finishRegister = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(finishRegister);
+
         finish();
     }
 
@@ -93,11 +93,18 @@ public class RegisterActivity extends AppCompatActivity {
 
         mFullName = (EditText) findViewById(R.id.name);
 
-        telephone = (EditText) findViewById(R.id.tel);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            telephone.addTextChangedListener(new PhoneNumberFormattingTextWatcher("BR"));
-        }
+        //Resgato o número do telefone
+        TelephonyManager tMgr = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        mPhoneNumber = tMgr.getLine1Number();
 
+        //Se não achar eu deixo o usuário preencher
+        if(mPhoneNumber == null || mPhoneNumber.equals("")) {
+            telephone = (EditText) findViewById(R.id.tel);
+            telephone.setVisibility(View.VISIBLE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                telephone.addTextChangedListener(new PhoneNumberFormattingTextWatcher("BR"));
+            }
+        }
 
         mAuth = FirebaseAuth.getInstance();
 
